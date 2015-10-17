@@ -82,6 +82,11 @@ class irc_handler:
                             message = real_message[1:]
                         else:
                             message = real_message
+                        
+                        #Must answer the call of duty
+                        if message.strip() == "bot roll call":
+                            print(message)
+                            self.privmsg(channel, "My name is Michael J. Caboose and I hate babies.")
 
                         #Check if we care about the msesage
                         if message.startswith(self.LEADER):
@@ -92,7 +97,7 @@ class irc_handler:
                                 message = parts[1]
                             else:
                                 message = ""
-                                
+                            
                             #invoke associated command or error
                             if command_ in self.COMMANDS:
                                 self.COMMANDS[command_](nick, channel, message, self.privmsg)
