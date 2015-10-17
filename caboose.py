@@ -3,6 +3,7 @@ import bot.reload
 import bot.irc
 import bot.reminder_check
 import os
+import threading
 
 if __name__ == "__main__":
     settings_dict = bot.settings.get_config()
@@ -11,5 +12,8 @@ if __name__ == "__main__":
         settings_dict['port'], settings_dict['nick'], 
         settings_dict['startchannels'], settings_dict['leader'],
         bot.reload.reload_commands())
-    bot.reminder_check.remindercheck(handler.privmsg)
+
+    t = threading.Timer(60.0, bot.reminder_check.remindercheck, [handler.privmsg])
+    t.daemon = True
+    t.start()
     handler.listen()
