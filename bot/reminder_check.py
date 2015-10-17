@@ -11,11 +11,8 @@ def remindercheck(privmsg):
 
     rm = open("reminders.txt", "w")
     for line in reminderlist:
-        
-        #this bit here is messy, but i needed to extract the month, day,
-        #year, hour, and minute from the reminder in the line to load
-        #into the datetime object, to compare to the current datetime.
         try: 
+            #get all of our time-related data from the reminder line
             reminderdate, remindertime, remindernick, remindertext = line.split(' ', maxsplit = 3)
             remmonth, remday, remyear = reminderdate.split('/')
             remhour, remmin = remindertime.split(':')
@@ -31,7 +28,5 @@ def remindercheck(privmsg):
                 rm.write(line)
         except IndexError:
             print("Reminders file empty")
-
     rm.close()
-    #Create and start a 60 second treading timer to do remindercheck
     print("Reminders Checked")
