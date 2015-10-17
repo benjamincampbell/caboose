@@ -2,36 +2,28 @@ import datetime
 def remindme(nick, channel, message, privmsg):
     #Structure is nick channel MM/DD/YYYY HH:MM reminder
 
-    remparts = message.split(maxsplit=2)
     #split the message into parts
     try:
-        remdate = remparts[0]
-        remtime = remparts[1]
-        remtext = remparts[2]
-        date = remdate.split('/')
-        time = remtime.split(':')
+        remdate, remtime, remtext = message.split(maxsplit = 2)
     except:
         dateformat = False
     #split the date into parts
     try:
-        datemonth = date[0]
-        dateday = date[1]
-        dateyear = date[2]
+        dateyear, datemonth, dateday = remdate.split('/')
         dateformat = True
     except:
         dateformat = False #IndexError means less than 2 splits were made, which means a character other than '/' was used to split.
 
     #split the time into parts
     try:
-        timehr = time[0]
-        timemin = time[1]
+        timehr, timemin = remtime.split(':')
         timeformat = True
     except:
         timeformat = False #IndexError means less than 1 split was made, which means a character other than ':' was used to split
 
     def checkdate(string): #function to check date format
         try:
-            datetime.datetime.strptime(string, '%m/%d/%Y')
+            datetime.datetime.strptime(string, '%Y/%m/%d')
             format = True
         except:
             format = False
