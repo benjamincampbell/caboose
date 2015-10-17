@@ -40,6 +40,10 @@ class irc_handler:
         """Join IRC Channel"""
         self.sendraw("JOIN %s\r\n" % chan)
 
+    def leave(self, chan):
+        """Leave IRC Channel"""
+        self.sendraw("PART %s\r\n" % chan)
+
     def pong(self, response):
         """Send PONG response to server PING"""
         self.sendraw("PONG %s\r\n" %response)
@@ -82,7 +86,7 @@ class irc_handler:
                             message = real_message[1:]
                         else:
                             message = real_message
-                        
+
                         #Must answer the call of duty
                         if message.strip() == "bot roll call":
                             print(message)
@@ -100,7 +104,7 @@ class irc_handler:
                             
                             #invoke associated command or error
                             if command_ in self.COMMANDS:
-                                self.COMMANDS[command_](nick, channel, message, self.privmsg)
+                                self.COMMANDS[command_](nick, channel, message, self)
                             elif command_ == "reload":
                                 self.COMMANDS = bot.reload.reload_commands()
                             elif command_ == "quit":

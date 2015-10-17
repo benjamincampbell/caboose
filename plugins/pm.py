@@ -1,5 +1,5 @@
-def pm(nick, channel, message, privmsg):
+def pm(nick, channel, message, handler):
 	#!pm targetUser message
 	targetUser = message.split()[0]
 	pmessage = message.split(" ", 1)[1]
-	privmsg(targetUser, '{}: {}'.format(nick, pmessage))
+	handler.privmsg(targetUser, '{}: {}'.format(nick, pmessage))

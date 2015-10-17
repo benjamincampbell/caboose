@@ -1,6 +1,6 @@
 import random
 
-def choose(nick, channel, message, privmsg):
+def choose(nick, channel, message, handler):
     choices = message.split(sep = ",")
     #this line removes empty strings from consecutive commas
     choices = [i for i in choices if i != '']
@@ -8,4 +8,4 @@ def choose(nick, channel, message, privmsg):
     #this line makes the choice string look better, no leading spaces or brackets
     winner = "".join(choice).strip()
 
-    privmsg(channel, "{}: {}".format(nick, winner))
+    handler.privmsg(channel, "{}: {}".format(nick, winner))

@@ -1,31 +1,47 @@
-def admin(nick, channel, message, privmsg):
-    cmdname = message.split()
-    cmd = cmdname[0]
-    name = cmdname[1]
+def admin(nick, channel, message, handler):
+    try:
+        cmd, name = message.split()
 
-    with open("admins.txt", 'r') as r: 
-        adminslist = r.read().splitlines()
+        with open("admins.txt", 'r') as r: 
+            adminslist = r.read().splitlines()
 
-    if nick in adminslist:
-        if cmd == "add":
-            with open("admins.txt", 'a') as r:
-                r.write(name + "\n")
-            privmsg(channel, '{}: {}'.format(nick, name + " added to admins"))
-        elif cmd == "remove":
-            if name != "twitch":
-                with open("admins.txt", 'w') as r:
-                    for adminline in adminslist:
-                        if adminline != name:
-                            r.write(adminline + "\n")
-                privmsg(channel, '{}: {}'.format(nick, name + " removed from admins"))
+        if nick in adminslist:
+            if cmd == "add":
+                with open("admins.txt", 'a') as r:
+                    r.write(name + "\n")
+                handler.privmsg(channel, '{}: {}'.format(nick, name + " added to admins"))
+            elif cmd == "remove":
+                if name != "twitch":
+                    with open("admins.txt", 'w') as r:
+                        for adminline in adminslist:
+                            if adminline != name:
+                                r.write(adminline + "\n")
+                    handler.privmsg(channel, '{}: {}'.format(nick, name + " removed from admins"))
+                else:
+                    handler.privmsg(channel, '{}: {}'.format(nick, "Can't let you do that, Star Fox."))
             else:
-                privmsg(channel, '{}: {}'.format(nick, "Can't let you do that, Star Fox."))
+                pass
         else:
             pass
-    else:
-        pass
 
-    with open("admins.txt", 'r') as r: 
-        adminslist = r.read().splitlines()
-    print("Admins:")
-    print(adminslist)
+        with open("admins.txt", 'r') as r: 
+            adminslist = r.read().splitlines()
+        print("Admins:")
+        print(adminslist)
+    except ValueError:
+        handler.privmsg(channel, '{}: One at a time, please, I\'m not a barbarian'.format(nick))
+
+def join(nick, channel, message, handler):
+    with open("admins.txt", 'r') as r:
+        if nick in r.read().splitlines():
+            if len(message.split()) == 1:
+                handler.join(message)
+        else:
+            handler.privmsg(channel, '{}: You don\'t have permission to do that'.format(nick))
+
+def leave(nick, channel, message, handler):
+    with open("admins.txt", 'r') as r:
+        if nick in r.read().splitlines():
+            handler.leave(channel)
+        else:
+            handler.privmsg(channel, '{}: You don\'t have permission to do that'.format(nick))
