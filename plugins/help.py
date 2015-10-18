@@ -1,9 +1,6 @@
-import pprint
-
 def help(nick, channel, message, handler):
+    handler.privmsg(channel, "Available commands: {}".format(", ".join(key for key 
+        in handler.COMMANDS if key != "__builtins__")))
 
-    #iterate through the handler.COMMANDS dictionary's keys, take all except __builtins__.
-    #that should give all the user commands
-
-
-    handler.privmsg(channel, "Available commands: {}".format())
+    #TODO: This currently also displays imported modules such as datetime, random, etc.
+    #Fix so it only shows commands users can access, might have to use decorators.
