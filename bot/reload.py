@@ -1,6 +1,13 @@
 import glob
 import os
 
+def command(name, **options):
+    def decorator(function):
+        options['function'] = function
+        commands[name] = options
+        return function
+    return decorator
+
 def reload_commands():
     print("Attempting to reload commands...")
     global commands
