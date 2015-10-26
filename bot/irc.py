@@ -94,7 +94,7 @@ class irc_handler:
 
                         #Check if we care about the msesage
                         if message.startswith(self.LEADER):
-                            parts = message.split(sep=None, maxsplit=1)
+                            parts = message.strip().split(sep=None, maxsplit=1)
                             command_ = parts[0][len(self.LEADER):]
                             #Give a default value for message if none is provided.
                             if len(parts) == 2:
@@ -106,7 +106,10 @@ class irc_handler:
                             if command_ in self.COMMANDS:
                                 self.COMMANDS[command_](nick, channel, message, self)
                             elif command_ == "man":
-                                self.privmsg(channel, self.COMMANDS[command_].man)
+                                if parts[1] in self.COMMANDS:
+                                    self.privmsg(channel, self.COMMANDS[parts[1]].man)
+                                else:
+                                    self.privmsg(channel, "unknown command '{}'".format(parts[1]))
                             elif command_ == "reload":
                                 self.COMMANDS = bot.reload.reload_commands()
                             elif command_ == "quit":

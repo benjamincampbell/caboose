@@ -1,4 +1,6 @@
 import datetime
+
+@command("remindme", man = "Sets a reminder at a given time to be private messaged to you. Usage: &remindme YYYY/MM/DD HH:MM 'reminder text', please use 24-hour time format")
 def remindme(nick, channel, message, handler):
     #Structure is nick channel MM/DD/YYYY HH:MM reminder
 

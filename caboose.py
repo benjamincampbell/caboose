@@ -13,6 +13,7 @@ if __name__ == "__main__":
         settings_dict['startchannels'], settings_dict['leader'],
         bot.reload.reload_commands())
 
+    #These lines start the reminder_check thread that checks every 60 seconds
     t = threading.Timer(60.0, bot.reminder_check.remindercheck, [handler.privmsg])
     t.daemon = True
     t.start()
