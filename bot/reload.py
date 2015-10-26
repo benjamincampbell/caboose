@@ -1,10 +1,21 @@
 import glob
 import os
 
+class cmd(object):
+    def __init__(self, func, opts):
+        self.func = func
+        self.opts = opts
+
+    def __call__(self, *argv):
+        return self.func(*argv)
+    
+    def __getattr__(self, name):
+        return self.opts[name]
+
 def command(name, **options):
     def decorator(function):
-        options['function'] = function
-        commands[name] = options
+        global commands
+        commands[name] = cmd(function, options)
         return function
     return decorator
 
@@ -15,5 +26,5 @@ def reload_commands():
     command_files = glob.glob(os.path.join("plugins", "*.py"))
     for source in command_files:
         print("Loading {0}".format(source))
-        exec(compile(open(source, "U").read(), source, "exec"), commands)
+        exec(compile(open(source, "U").read(), source, "exec"))
     return commands
