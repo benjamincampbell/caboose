@@ -16,7 +16,7 @@ def admin(nick, channel, message, handler):
                     with open("admins.txt", 'w') as r:
                         for adminline in adminslist:
                             if adminline != name:
-                                r.write(adminline + "\n"
+                                r.write(adminline + "\n")
                     handler.privmsg(channel, '{}: {}'.format(nick, name + " removed from admins"))
                 else:
                     handler.privmsg(channel, '{}: {}'.format(nick, "Can't let you do that, Star Fox."))
