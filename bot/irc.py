@@ -105,11 +105,6 @@ class irc_handler:
                             #invoke associated command or error
                             if command_ in self.COMMANDS:
                                 self.COMMANDS[command_](nick, channel, message, self)
-                            elif command_ == "man":
-                                if parts[1] in self.COMMANDS:
-                                    self.privmsg(channel, self.COMMANDS[parts[1]].man)
-                                else:
-                                    self.privmsg(channel, "unknown command '{}'".format(parts[1]))
                             elif command_ == "reload":
                                 self.COMMANDS = bot.reload.reload_commands()
                             elif command_ == "quit":

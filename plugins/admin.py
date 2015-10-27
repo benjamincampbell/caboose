@@ -48,3 +48,7 @@ def leave(nick, channel, message, handler):
             handler.leave(channel)
         else:
             handler.privmsg(channel, '{}: You don\'t have permission to do that'.format(nick))
+
+#@command("reload", man = "Makes Caboose reload the plugins folder. Admin only. Usage: &reload")
+#def reload(nick, channel, message, handler):
+#    handler.COMMANDS = bot.reload.reload_commands()
