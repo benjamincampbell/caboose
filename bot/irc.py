@@ -59,7 +59,10 @@ class irc_handler:
         while 1:
             data = self.recv()
             for line in data.splitlines():
-                print(line)
+                try:
+                    print(line)
+                except:
+                    print("AN ERROR OCCURED RIIIIIIIGHT ABOUT HERE")
                 if "PING" == line.split()[0]:
                     self.pong(line.split()[1])
                 if "PRIVMSG" in line:
@@ -107,6 +110,8 @@ class irc_handler:
                                 self.COMMANDS[command_](nick, channel, message, self)
                             elif command_ == "reload":
                                 self.COMMANDS = bot.reload.reload_commands()
+                            elif command_ == "source":
+                                privmsg(channel, "http://github.com/benjamincampbell/caboose")
                             elif command_ == "quit":
                                 quit(nick)
                             else:
