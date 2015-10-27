@@ -111,7 +111,7 @@ class irc_handler:
                             elif command_ == "reload":
                                 self.COMMANDS = bot.reload.reload_commands()
                             elif command_ == "source":
-                                privmsg(channel, "http://github.com/benjamincampbell/caboose")
+                                self.privmsg(channel, "http://github.com/benjamincampbell/caboose")
                             elif command_ == "quit":
                                 quit(nick)
                             else:
