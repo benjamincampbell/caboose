@@ -17,12 +17,18 @@ class irc_handler:
         self.SOCK.connect((host, port))
 
     def recv(self):
-        message = self.SOCK.recv(2048).decode("utf-8")
+        try:
+            message = self.SOCK.recv(2048).decode("utf-8")
+        except:
+            print("A BAD THING HAPPENED IN recv()")
         return message
 
     def sendraw(self, string):
-        print(">" + string.strip())
-        self.SOCK.send(string.encode())
+        try:
+            print(">" + string.strip())
+            self.SOCK.send(string.encode())
+        except:
+            print("A BAD THING HAPPENED IN sendraw()")
 
     def privmsg(self, channel, message):
         msg = "PRIVMSG %s :%s\r\n" % (channel, message)
@@ -62,7 +68,7 @@ class irc_handler:
                 try:
                     print(line)
                 except:
-                    print("AN ERROR OCCURED RIIIIIIIGHT ABOUT HERE")
+                    print("AN ERROR OCCURED IN print(line)")
                 if "PING" == line.split()[0]:
                     self.pong(line.split()[1])
                 if "PRIVMSG" in line:
