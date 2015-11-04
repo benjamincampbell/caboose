@@ -48,3 +48,11 @@ def leave(nick, channel, message, handler):
             handler.leave(channel)
         else:
             handler.privmsg(channel, '{}: You don\'t have permission to do that'.format(nick))
+
+@command("quit", man = "Makes Caboose quit. Usage: &quit")
+def quit(nick, channel, message, handler):
+        with open("admins.txt", 'r') as r:
+        if nick in r.read().splitlines():
+            quit()
+        else:
+            handler.privmsg(channel, '{}: You don\'t have permission to do that'.format(nick))
