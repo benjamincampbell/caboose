@@ -1,7 +1,8 @@
-import datetime
+
 
 @command("remindme", man = "Sets a reminder at a given time to be private messaged to you. Usage: &remindme YYYY/MM/DD HH:MM 'reminder text', please use 24-hour time format")
 def remindme(nick, channel, message, handler):
+    import datetime
     #Structure is nick channel MM/DD/YYYY HH:MM reminder
 
     def checkdate(): #function to check date
@@ -18,7 +19,7 @@ def remindme(nick, channel, message, handler):
         remdate, remtime, remtext = message.split(maxsplit = 2)
         if checkdate():
             rm = open("reminders.txt", "a")
-            rm.write(remdate + " " + remtime + " " + nick + " " + remtext)
+            rm.write(remdate + " " + remtime + " " + channel + " " + nick + " " + remtext)
             rm.close()
             handler.privmsg(channel, '{}: {}'.format(nick, "Reminder set for " + remdate + " at " + remtime + "."))
     except ValueError: #This should catch any improper date formatting that happens when it tries to create the datetime object

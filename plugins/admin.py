@@ -51,7 +51,7 @@ def leave(nick, channel, message, handler):
 
 @command("quit", man = "Makes Caboose quit. Usage: &quit")
 def quit(nick, channel, message, handler):
-        with open("admins.txt", 'r') as r:
+    with open("admins.txt", 'r') as r:
         if nick in r.read().splitlines():
             quit()
         else:

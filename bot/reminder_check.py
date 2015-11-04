@@ -1,8 +1,9 @@
 import os
 import time
 import datetime
+import threading
 
-def remindercheck(privmsg):
+def reminderCheck(privmsg):
     #format: MM/DD/YYYY HH:MM nick reminder text
     currentdate = datetime.datetime.now()
     rm = open("reminders.txt", "r")
@@ -13,9 +14,7 @@ def remindercheck(privmsg):
     for line in reminderlist:
         try: 
             #get all of our time-related data from the reminder line
-            reminderdate, remindertime, remindernick, remindertext = line.split(' ', maxsplit = 3)
-            #remmonth, remday, remyear = reminderdate.split('/')
-            #remhour, remmin = remindertime.split(':')
+            reminderdate, remindertime, reminderchannel, remindernick, remindertext = line.split(' ', maxsplit = 4)
             #get the difference between the reminder time and current time
             reminderobject = datetime.datetime(*[int(x) for x in reminderdate.split('/')] + [int(x) for x in remindertime.split(':')])
             reminderdelta = reminderobject - currentdate
@@ -23,10 +22,13 @@ def remindercheck(privmsg):
             if reminderdelta < datetime.timedelta(seconds = 1):
                 print("Reminder detected!")
                 print(reminderdelta)
-                privmsg(remindernick, '{}: REMINDER: {}'.format(remindernick, remindertext))
+                privmsg(reminderchannel, '{}: REMINDER: {}'.format(remindernick, remindertext))
             else:
                 rm.write(line)
         except ValueError:
             print("Reminders file empty")
     rm.close()
     print("Reminders Checked")
+    t = threading.Timer(60.0, reminderCheck, [privmsg])
+    t.daemon = True
+    t.start()
