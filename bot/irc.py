@@ -3,12 +3,12 @@ import socket
 import bot.reload
 
 class irc_handler:
-    def __init__(self, host, port, nick, startchannels, leader, commands):
-        self.HOST = host
-        self.PORT = int(port)
-        self.NICK = nick
-        self.STARTCHANNELS = startchannels
-        self.LEADER = leader
+    def __init__(self, settings_dict, commands):
+        self.HOST = settings_dict['host']
+        self.PORT = int(settings_dict['port'])
+        self.NICK = settings_dict['nick']
+        self.STARTCHANNELS = settings_dict['startchannels']
+        self.LEADER = settings_dict['leader']
         self.COMMANDS = commands
 
     def socket_connect(self, host, port):
@@ -67,10 +67,7 @@ class irc_handler:
         while 1:
             data = self.recv()
             for line in data.splitlines():
-                try:
-                    print(line)
-                except:
-                    print("AN ERROR OCCURED IN print(line)")
+                print(line)
                 if "PING" == line.split()[0]:
                     self.pong(line.split()[1])
                 if "PRIVMSG" in line:

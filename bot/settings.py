@@ -4,7 +4,7 @@ def get_config():
     #Uses configparser to load the config file
     dict1 = {}
     Config = configparser.ConfigParser()
-    Config.read("bot\config.ini")
+    Config.read("config.ini")
     options = Config.options("Settings")
     for option in options:
         if option != "startchannels":
