@@ -1,4 +1,4 @@
-@command("admin", man = "Adds or removes people from admin list. Admin only. Usage: &admin add/remove name")
+@command("admin", man = "Adds or removes people from admin list. Admin only. Usage: -admin add/remove name")
 def admin(nick, channel, message, handler):
     try:
         cmd, name = message.split()
@@ -32,7 +32,7 @@ def admin(nick, channel, message, handler):
     except ValueError:
         handler.privmsg(channel, '{}: One at a time, please, I\'m not a barbarian'.format(nick))
 
-@command("join", man = "Makes Caboose join a channel. Admin only. Usage: &join #channel  (must type #)")
+@command("join", man = "Makes Caboose join a channel. Admin only. Usage: -join #channel  (must type #)")
 def join(nick, channel, message, handler):
     with open("admins.txt", 'r') as r:
         if nick in r.read().splitlines():
@@ -41,7 +41,7 @@ def join(nick, channel, message, handler):
         else:
             handler.privmsg(channel, '{}: You don\'t have permission to do that'.format(nick))
 
-@command("leave", man = "Makes Caboose leave the current channel. Admin only. Usage: &leave")
+@command("leave", man = "Makes Caboose leave the current channel. Admin only. Usage: -leave")
 def leave(nick, channel, message, handler):
     with open("admins.txt", 'r') as r:
         if nick in r.read().splitlines():
@@ -49,7 +49,7 @@ def leave(nick, channel, message, handler):
         else:
             handler.privmsg(channel, '{}: You don\'t have permission to do that'.format(nick))
 
-@command("quit", man = "Makes Caboose quit. Usage: &quit")
+@command("quit", man = "Makes Caboose quit. Usage: -quit")
 def quit(nick, channel, message, handler):
     with open("admins.txt", 'r') as r:
         if nick in r.read().splitlines():

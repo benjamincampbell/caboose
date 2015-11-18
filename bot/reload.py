@@ -16,7 +16,7 @@ class cmd(object):
 
 def command(name, **options):
     """ Command format example:
-    @command("echo", man = "Repeats back what is said. Syntax: &echo message")
+    @command("echo", man = "Repeats back what is said. Syntax: " + handler.LEADER + "echo message")
     def echo(nick, channel, message, handler):
         handler.privmsg(channel, message)
     """

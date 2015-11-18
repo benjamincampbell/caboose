@@ -19,9 +19,11 @@ class irc_handler:
     def recv(self):
         try:
             message = self.SOCK.recv(2048).decode("utf-8")
+            return message
         except:
             print("A BAD THING HAPPENED IN recv()")
-        return message
+            return "hush broke it"
+        
 
     def sendraw(self, string):
         try:
