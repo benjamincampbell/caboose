@@ -3,13 +3,14 @@ import socket
 import bot.reload
 
 class irc_handler:
-    def __init__(self, settings_dict, commands):
-        self.HOST = settings_dict['host']
-        self.PORT = int(settings_dict['port'])
-        self.NICK = settings_dict['nick']
-        self.STARTCHANNELS = settings_dict['startchannels']
-        self.LEADER = settings_dict['leader']
+    def __init__(self, settings, commands):
+        self.HOST = settings.config['host']
+        self.PORT = int(settings.config['port'])
+        self.NICK = settings.config['nick']
+        self.STARTCHANNELS = settings.config['startchannels']
+        self.LEADER = settings.config['leader']
         self.COMMANDS = commands
+        self.SETTINGS = settings
 
     def socket_connect(self, host, port):
         self.SOCK = socket.socket()
@@ -67,7 +68,10 @@ class irc_handler:
         while 1:
             data = self.recv()
             for line in data.splitlines():
-                print(line)
+                try:
+                    print(line)
+                except UnicodeEncodeError:
+                    print("UnicodeEncodeError")
                 if "PING" == line.split()[0]:
                     self.pong(line.split()[1])
                 if "PRIVMSG" in line:
@@ -112,10 +116,9 @@ class irc_handler:
                             
                             #invoke associated command or error
                             if command_ in self.COMMANDS:
-                                self.COMMANDS[command_](nick, channel, message, self)
+                                if nick.lower() not in self.SETTINGS.ignore:
+                                    self.COMMANDS[command_](nick, channel, message, self)
                             elif command_ == "reload":
                                 self.COMMANDS = bot.reload.reload_commands()
                             elif command_ == "source":
                                 self.privmsg(channel, "http://github.com/benjamincampbell/caboose")
-                            else:
-                                self.privmsg(channel, "unknown command '{}'".format(command_))

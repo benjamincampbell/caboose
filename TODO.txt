@@ -1,0 +1,3 @@
+Add ignore list
+    -.txt file (For now) with things to ignore such as bots, ignore function in admin.py
+        to ignore/unignore things

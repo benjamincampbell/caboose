@@ -6,9 +6,9 @@ import os
 
 
 if __name__ == "__main__":
-    settings_dict = bot.settings.get_config()
+    settings = bot.settings.settings()
 
-    handler = bot.irc.irc_handler(settings_dict,
+    handler = bot.irc.irc_handler(settings,
         bot.reload.reload_commands())
 
     #These lines start the reminder_check thread that checks every 60 seconds
