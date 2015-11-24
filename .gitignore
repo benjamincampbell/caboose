@@ -40,4 +40,5 @@ Thumbs.db
 # Caboose Specific #
 ####################
 reminders.txt
+ignore.txt
 __pycache__/
