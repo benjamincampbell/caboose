@@ -1,4 +1,4 @@
-@command("admin", man = "Adds or removes people from admin list. Admin only. Usage: -admin add/remove name")
+@command("admin", man = "Adds people to admin list. Admin only. Usage: -admin nick1 nick2")
 def admin(nick, channel, message, handler):
     if nick in handler.SETTINGS.admins:
         toadmin = message.split()
@@ -9,7 +9,7 @@ def admin(nick, channel, message, handler):
     else:
         handler.privmsg(channel, '{}: You don\'t have permission to do that'.format(nick))
 
-@command("unadmin", man = "Removes people from admin list. Admin only. Usage: -unadmin nick1")
+@command("unadmin", man = "Removes people from admin list. Admin only. Usage: -unadmin nick1 nick2")
 def unadmin(nick, channel, message, handler):
     if nick in handler.SETTINGS.admins:
         with open("admins.txt", 'r') as f:
