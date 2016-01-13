@@ -17,7 +17,7 @@ class settings:
 
     def update_ignorelist(self):
         #Check and make sure a file is made if it doesn't exist
-        if (!os.path.exists("ignore.txt")):
+        if (os.path.exists("ignore.txt")) == False:
             with open("ignore.txt", 'w') as f:
                 pass
         ignorelist = []
@@ -26,7 +26,7 @@ class settings:
         self.ignore = ignorelist
 
     def update_adminlist(self):
-        if (!os.path.exists("admins.txt")):
+        if (os.path.exists("admins.txt")) == False:
             with open("admins.txt", 'w') as f:
                 pass
         adminlist = []

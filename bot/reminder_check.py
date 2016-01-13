@@ -6,6 +6,11 @@ import threading
 def reminderCheck(privmsg):
     #format: MM/DD/YYYY HH:MM nick reminder text
     currentdate = datetime.datetime.now()
+
+    if os.path.exists("reminders.txt") == False:
+        with open("reminders.txt", 'w') as f:
+            pass
+
     rm = open("reminders.txt", "r")
     reminderlist = rm.readlines()
     rm.close()
