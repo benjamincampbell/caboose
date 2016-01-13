@@ -1,0 +1,8 @@
+Switch to db using sqlite for:
+    -reminders
+    -ignorelist
+    -adminlist
+        *put main admin in config.ini so caboose has 1 admin on startup
+    -rid of unnecessary .txt files afterwards
+
+-rid of unnecessary __init__.py files

@@ -5,7 +5,7 @@ def admin(nick, channel, message, handler):
         with open("admins.txt", 'a') as f:
             for nick in toadmin:
                 f.write('{}\n'.format(nick))
-        handler.SETTINGS.update()
+        handler.SETTINGS.update_adminslist()
     else:
         handler.privmsg(channel, '{}: You don\'t have permission to do that'.format(nick))
 
@@ -18,7 +18,7 @@ def unadmin(nick, channel, message, handler):
             for nick in adminslist:
                 if nick not in message.split():
                     f.write("{}\n".format(nick))
-        handler.SETTINGS.update()
+        handler.SETTINGS.update_adminslist()
     else:
         handler.privmsg(channel, '{}: You don\'t have permission to do that'.format(nick))
 
@@ -51,7 +51,7 @@ def ignore(nick, channel, message, handler):
         with open("ignore.txt", 'a') as f:
             for nick in toignore:
                 f.write('{}\n'.format(nick))
-        handler.SETTINGS.update()
+        handler.SETTINGS.update_ignorelist()
     else:
         handler.privmsg(channel, '{}: You don\'t have permission to do that'.format(nick))
 
@@ -65,7 +65,7 @@ def uningore(nick, channel, message, handler):
             for nick in ignorelist:
                 if nick not in message.split():
                     f.write("{}\n".format(nick))
-        handler.SETTINGS.update()
+        handler.SETTINGS.update_ignorelist()
     else:
         handler.privmsg(channel, '{}: You don\'t have permission to do that'.format(nick))
 

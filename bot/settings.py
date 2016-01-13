@@ -9,24 +9,24 @@ class settings:
         self.update()
 
     def update(self):
-        self.ignore = self.get_ignorelist()
-        self.admins = self.get_adminlist()
-        self.config = self.get_config()
+        self.update_ignorelist()
+        self.update_adminlist()
+        self.update_config()
 
-    def get_ignorelist(self):
+    def update_ignorelist(self):
         ignorelist = []
         with open("ignore.txt", 'r') as f:
             ignorelist = f.read().splitlines()
-        return ignorelist
+        self.ignore = ignorelist
 
-    def get_adminlist(self):
+    def update_adminlist(self):
         adminlist = []
         with open("admins.txt", 'r') as f:
             adminlist = f.read().splitlines()
-        return adminlist
+        self.admins = adminlist
 
 
-    def get_config(self):
+    def update_config(self):
         #Uses configparser to load the config file
         dict1 = {}
         Config = configparser.ConfigParser()
@@ -39,4 +39,4 @@ class settings:
                 dict1[option] = []
                 for channel in Config.get("Settings", option).split(','):
                     dict1[option].append("#{0}".format(channel))
-        return dict1
+        self.config = dict1

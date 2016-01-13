@@ -1,6 +1,7 @@
 import sys
 import socket
 import bot.reload
+import datetime
 
 class irc_handler:
     def __init__(self, settings, commands):
@@ -11,6 +12,8 @@ class irc_handler:
         self.LEADER = settings.config['leader']
         self.COMMANDS = commands
         self.SETTINGS = settings
+
+        self.pingcheck = datetime.datetime.now()
 
     def socket_connect(self, host, port):
         self.SOCK = socket.socket()
@@ -57,7 +60,14 @@ class irc_handler:
         """Send PONG response to server PING"""
         self.sendraw("PONG %s\r\n" %response)
 
+    def ping_update(self):
+        pingupdate = datetime.datetime.now()
+        diff = (pingupdate - self.pingcheck).seconds
+        if diff > 5:
+            return true
+
     def listen(self):
+        #if self.ping_update():
         self.socket_connect(self.HOST, self.PORT)
         self.nick(self.NICK)
         self.user(self.NICK, self.NICK)
