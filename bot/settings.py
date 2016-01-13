@@ -1,4 +1,5 @@
 import configparser
+import os.path
 
 class settings:
 
@@ -9,17 +10,25 @@ class settings:
         self.update()
 
     def update(self):
+        #Updates all at once, separate methods in case only one needs updating
         self.update_ignorelist()
         self.update_adminlist()
         self.update_config()
 
     def update_ignorelist(self):
+        #Check and make sure a file is made if it doesn't exist
+        if (!os.path.exists("ignore.txt")):
+            with open("ignore.txt", 'w') as f:
+                pass
         ignorelist = []
         with open("ignore.txt", 'r') as f:
             ignorelist = f.read().splitlines()
         self.ignore = ignorelist
 
     def update_adminlist(self):
+        if (!os.path.exists("admins.txt")):
+            with open("admins.txt", 'w') as f:
+                pass
         adminlist = []
         with open("admins.txt", 'r') as f:
             adminlist = f.read().splitlines()
