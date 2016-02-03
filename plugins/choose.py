@@ -1,4 +1,4 @@
-@command("choose", man = "Chooses at random from a selection. Usage: -choose option 1, option 2, option 3")
+@command("choose", man = "Chooses at random from a selection. Usage: &choose option 1, option 2, option 3")
 def choose(nick, channel, message, handler):
     import random
     choices = message.split(sep = ",")

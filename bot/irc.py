@@ -58,7 +58,11 @@ class irc_handler:
 
     def pong(self, response):
         """Send PONG response to server PING"""
-        self.sendraw("PONG %s\r\n" %response)
+        self.sendraw("PONG %s\r\n" % response)
+
+    def kick(self, channel, user, reason):
+        """ Kick user from channel (if has ops)"""
+        self.sendraw("KICK %s %s %s\r\n" % (channel, user, reason))
 
     def ping_update(self):
         pingupdate = datetime.datetime.now()
