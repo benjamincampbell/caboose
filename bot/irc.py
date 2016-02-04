@@ -8,7 +8,7 @@ class irc_handler:
         self.HOST = settings.config['host']
         self.PORT = int(settings.config['port'])
         self.NICK = settings.config['nick']
-        self.STARTCHANNELS = settings.config['startchannels']
+        self.CHANNELS = settings.config['channels']
         self.LEADER = settings.config['leader']
         self.COMMANDS = commands
         self.SETTINGS = settings
@@ -75,7 +75,7 @@ class irc_handler:
         self.socket_connect(self.HOST, self.PORT)
         self.nick(self.NICK)
         self.user(self.NICK, self.NICK)
-        for channel in self.STARTCHANNELS:
+        for channel in self.CHANNELS:
             self.join(channel)
             self.privmsg(channel, "{0} up and running".format(self.NICK))
 
@@ -88,6 +88,7 @@ class irc_handler:
                     print("UnicodeEncodeError")
                 if "PING" == line.split()[0]:
                     self.pong(line.split()[1])
+                #Any other checks, such as userjoins, would go here
                 if "PRIVMSG" in line:
                     parts = data.split(sep=' ', maxsplit=3)
                     if len(parts) == 4:

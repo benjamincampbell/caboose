@@ -7,6 +7,7 @@ class settings:
         self.ignore = []
         self.admins = []
         self.config = {}
+        self.channels = {}
         self.update()
 
     def update(self):
@@ -14,7 +15,7 @@ class settings:
         self.update_ignorelist()
         self.update_adminlist()
         self.update_config()
-
+        
     def update_ignorelist(self):
         #Check and make sure a file is made if it doesn't exist
         if (os.path.exists("ignore.txt")) == False:
@@ -34,18 +35,19 @@ class settings:
             adminlist = f.read().splitlines()
         self.admins = adminlist
 
-
     def update_config(self):
         #Uses configparser to load the config file
         dict1 = {}
+        dict2 = {}
         Config = configparser.ConfigParser()
         Config.read("config.ini")
         options = Config.options("Settings")
         for option in options:
-            if option != "startchannels":
+            if option != "channels":
                 dict1[option] = Config.get("Settings", option)
             else:
-                dict1[option] = []
+                dict2[option] = []
                 for channel in Config.get("Settings", option).split(','):
                     dict1[option].append("#{0}".format(channel))
         self.config = dict1
+        self.channels = dict2
