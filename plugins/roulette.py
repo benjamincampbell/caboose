@@ -16,7 +16,7 @@ def roulette(nick, channel, message, handler):
     result = random.choice(chamber)
 
     if result == 'bang':
-        if random.randint(1, 100) < 1:
+        if random.randint(1, 100) > 1:
             #reload
             chamber = ['click','click','click','click','click','bang']
             handler.kick(channel, nick, result)
@@ -24,10 +24,10 @@ def roulette(nick, channel, message, handler):
         else:
             #misfire! 1/100 chance to not fire. lucked out!
             chamber = ['click','click','click','click','click','bang']
-            handler.privmsg(channel, '{}: misfire! reloading...')
+            handler.privmsg(channel, '{}: misfire! reloading...'.format(nick))
     else:
         #remove one click
-        handler.privmsg(channel, '{}: {}'.format(nick, result))
+        handler.privmsg(channel, '{}'.format(result))
         chamber.remove('click')
         print("click removed")
         print(chamber)
