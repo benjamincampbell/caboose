@@ -1,11 +1,40 @@
 import configparser
 import os.path
 
-class settings:
+class ChannelOptions:
+    #object to hold options on a by-channel basis
+    def __init__(self):
+        #set options to defaults
+        self.autoops = False
+        self.spamlimit = False
+        self.admins = ['twitch']
 
+    def toggle_autoops(self):
+        if (self.autoops):
+            self.autoops = False
+        else:
+            self.autoops = True
+
+    def toggle_spamlimit(self):
+        if (self.spamlimit):
+            self.spamlimit = False
+        else:
+            self.spamlimit = True
+
+    def add_admin(self, admin):
+        if admin in self.admins:
+            return false
+        else:
+            self.admins.append(admin)
+
+
+
+
+class Settings:
+    #object to hold settings for Caboose
     def __init__(self):
         self.ignore = []
-        self.admins = []
+        self.globaladmins = []
         self.config = {}
         self.channels = {}
         self.update()
@@ -26,28 +55,29 @@ class settings:
             ignorelist = f.read().splitlines()
         self.ignore = ignorelist
 
-    def update_adminlist(self):
-        if (os.path.exists("admins.txt")) == False:
-            with open("admins.txt", 'w') as f:
+    def update_globaladminlist(self):
+        if (os.path.exists("globaladmins.txt")) == False:
+            with open("globaladmins.txt", 'w') as f:
                 pass
         adminlist = []
-        with open("admins.txt", 'r') as f:
+        with open("globaladmins.txt", 'r') as f:
             adminlist = f.read().splitlines()
-        self.admins = adminlist
+        self.globaladmins = adminlist
 
     def update_config(self):
         #Uses configparser to load the config file
         dict1 = {}
         dict2 = {}
         Config = configparser.ConfigParser()
+        
         Config.read("config.ini")
         options = Config.options("Settings")
         for option in options:
             if option != "channels":
                 dict1[option] = Config.get("Settings", option)
             else:
-                dict2[option] = []
                 for channel in Config.get("Settings", option).split(','):
                     dict1[option].append("#{0}".format(channel))
+                    dict2[channel] = ChannelOptions()
         self.config = dict1
         self.channels = dict2

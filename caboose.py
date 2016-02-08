@@ -6,7 +6,7 @@ import os
 
 
 if __name__ == "__main__":
-    settings = bot.settings.settings()
+    settings = bot.settings.Settings()
 
     handler = bot.irc.irc_handler(settings,
         bot.reload.reload_commands())
