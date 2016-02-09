@@ -26,6 +26,7 @@ class ChannelOptions:
             return False
         else:
             self.admins.append(admin)
+            return True
 
     def remove_admin(self, admin):
         if admin in self.admins:
