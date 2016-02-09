@@ -8,7 +8,7 @@ class irc_handler:
         self.HOST = settings.config['host']
         self.PORT = int(settings.config['port'])
         self.NICK = settings.config['nick']
-        self.CHANNELS = settings.config['channels']
+        self.CHANNELS = settings.channels
         self.LEADER = settings.config['leader']
         self.COMMANDS = commands
         self.SETTINGS = settings

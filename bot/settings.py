@@ -23,11 +23,16 @@ class ChannelOptions:
 
     def add_admin(self, admin):
         if admin in self.admins:
-            return false
+            return False
         else:
             self.admins.append(admin)
 
-
+    def remove_admin(self, admin):
+        if admin in self.admins:
+            self.admins.remove(admin)
+            return True
+        else:
+            return False
 
 
 class Settings:
@@ -42,7 +47,7 @@ class Settings:
     def update(self):
         #Updates all at once, separate methods in case only one needs updating
         self.update_ignorelist()
-        self.update_adminlist()
+        self.update_globaladminlist()
         self.update_config()
         
     def update_ignorelist(self):
@@ -69,7 +74,7 @@ class Settings:
         dict1 = {}
         dict2 = {}
         Config = configparser.ConfigParser()
-        
+
         Config.read("config.ini")
         options = Config.options("Settings")
         for option in options:
@@ -77,7 +82,7 @@ class Settings:
                 dict1[option] = Config.get("Settings", option)
             else:
                 for channel in Config.get("Settings", option).split(','):
-                    dict1[option].append("#{0}".format(channel))
-                    dict2[channel] = ChannelOptions()
+                    # dict1[option].append("#{0}".format(channel))
+                    dict2["#" + channel] = ChannelOptions()
         self.config = dict1
         self.channels = dict2
