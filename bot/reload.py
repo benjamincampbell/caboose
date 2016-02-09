@@ -6,6 +6,8 @@ class cmd(object):
     def __init__(self, func, opts):
         self.func = func
         self.opts = opts
+        self.visible = True
+        self.enabled = True
 
     def __call__(self, *argv):
         #python magic so calling the cmd object instance returns the function itself
@@ -13,6 +15,22 @@ class cmd(object):
     
     def __getattr__(self, name):
         return self.opts[name]
+
+    def toggle_visible(self):
+        if self.visible:
+            self.visible = False
+            return False
+        else:
+            self.visible = True
+            return True
+
+    def toggle_enabled(self):
+        if self.enabled:
+            self.enabled = False
+            return False
+        else:
+            self.enabled = True
+            return True
 
 def command(name, **options):
     """ Command format example:

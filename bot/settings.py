@@ -82,7 +82,6 @@ class Settings:
                 dict1[option] = Config.get("Settings", option)
             else:
                 for channel in Config.get("Settings", option).split(','):
-                    # dict1[option].append("#{0}".format(channel))
                     dict2["#" + channel] = ChannelOptions()
         self.config = dict1
         self.channels = dict2

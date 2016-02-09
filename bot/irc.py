@@ -71,6 +71,7 @@ class irc_handler:
             return true
 
     def listen(self):
+        #Initial connect, set nick, user, and join channels
         #if self.ping_update():
         self.socket_connect(self.HOST, self.PORT)
         self.nick(self.NICK)
@@ -80,15 +81,30 @@ class irc_handler:
             self.privmsg(channel, "{0} up and running".format(self.NICK))
 
         while 1:
+            #The listen loop
             data = self.recv()
             for line in data.splitlines():
                 try:
                     print(line)
                 except UnicodeEncodeError:
                     print("UnicodeEncodeError")
+
                 if "PING" == line.split()[0]:
                     self.pong(line.split()[1])
+
                 #Any other checks, such as userjoins, would go here
+
+                if "JOIN" == line.split()[1]:
+                    #source JOIN :#channel
+                    parts = data.split(sep = ' ', maxsplit = 2)
+                    real_source, real_channel = parts[0], parts[2]
+                    nick = real_source.split(sep = '!')[0]
+                    channel = line.split(sep = '#')[1]
+
+                    if nick != self.NICK:
+                        if self.CHANNELS["#" + channel].autoops:
+                            handler.COMMANDS['op'](self.NICK, channel, nick, self)
+
                 if "PRIVMSG" in line:
                     parts = data.split(sep=' ', maxsplit=3)
                     if len(parts) == 4:
@@ -131,7 +147,7 @@ class irc_handler:
                             
                             #invoke associated command or error
                             if command_ in self.COMMANDS:
-                                if nick.lower() not in self.SETTINGS.ignore:
+                                if (self.COMMANDS[command_].enabled and nick.lower() not in self.SETTINGS.ignore):
                                     self.COMMANDS[command_](nick, channel, message, self)
                             elif command_ == "reload":
                                 self.COMMANDS = bot.reload.reload_commands()
