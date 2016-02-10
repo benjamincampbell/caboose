@@ -93,17 +93,19 @@ class irc_handler:
                     self.pong(line.split()[1])
 
                 #Any other checks, such as userjoins, would go here
+                try:
+                    if "JOIN" == line.split()[1]:
+                        #source JOIN :#channel
+                        parts = data.split(sep = ' ', maxsplit = 2)
+                        real_source, real_channel = parts[0], parts[2]
+                        nick = real_source.split(sep = '!')[0][1:]
+                        channel = line.split(sep = '#')[1]
 
-                if "JOIN" == line.split()[1]:
-                    #source JOIN :#channel
-                    parts = data.split(sep = ' ', maxsplit = 2)
-                    real_source, real_channel = parts[0], parts[2]
-                    nick = real_source.split(sep = '!')[0][1:]
-                    channel = line.split(sep = '#')[1]
-
-                    if nick != self.NICK:
-                        if self.CHANNELS["#" + channel].autoops:
-                            self.COMMANDS['op'](self.NICK, "#" + channel, nick, self)
+                        if nick != self.NICK:
+                            if self.CHANNELS["#" + channel].autoops:
+                                self.COMMANDS['op'](self.NICK, "#" + channel, nick, self)
+                except IndexError:
+                    pass
 
                 if "PRIVMSG" in line:
                     parts = data.split(sep=' ', maxsplit=3)
