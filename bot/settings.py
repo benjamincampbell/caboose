@@ -12,14 +12,18 @@ class ChannelOptions:
     def toggle_autoops(self):
         if (self.autoops):
             self.autoops = False
+            return False
         else:
             self.autoops = True
+            return True
 
     def toggle_spamlimit(self):
         if (self.spamlimit):
             self.spamlimit = False
+            return False
         else:
             self.spamlimit = True
+            return True
 
     def add_admin(self, admin):
         if admin in self.admins:

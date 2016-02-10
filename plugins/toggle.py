@@ -10,6 +10,12 @@ def toggle(nick, channel, message, handler):
         else:
             #Toggling something else
             if message == 'autoops':
-                handler.SETTINGS.channels[channel].toggle_autoops()
+                if handler.SETTINGS.channels[channel].toggle_autoops():
+                    handler.privmsg(channel, "Auto-ops enabled for channel {}".format(channel))
+                else:
+                    handler.privmsg(channel, "Auto-ops disabled for channel {}".format(channel))
             elif message == 'spamlimit':
-                handler.SETTINGS.channels[channel].toggle_spamlimit()
+                if handler.SETTINGS.channels[channel].toggle_spamlimit():
+                    handler.privmsg(channel, "Spam-limit enabled for channel {}".format(channel))
+                else:
+                    handler.privmsg(channel, "Spam-limit disabled for channel {}".format(channel))
