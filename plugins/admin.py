@@ -29,7 +29,7 @@ def join(nick, channel, message, handler):
     if nick in handler.SETTINGS.globaladmins:
         if len(message.split()) == 1:
             handler.join(message)
-            handler.CHANNELS[message] = ChannelOptions
+            handler.CHANNELS[message] = ChannelOptions()
     else:
         handler.privmsg(channel, '{}: You don\'t have permission to do that'.format(nick))
 

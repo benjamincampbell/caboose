@@ -11,7 +11,7 @@ def op(nick, channel, message, handler):
 	for user in message.split():
             opstring += "%s " % user
 
-	if nick in handler.SETTINGS.admins:
+	if (nick == handler.NICK) or (nick in handler.SETTINGS.globaladmins) :
 		handler.sendraw("MODE %s %s\r\n" % (channel, opstring))
 	else:
 		handler.privmsg(channel, '{}: You don\'t have permission to do that'.format(nick))

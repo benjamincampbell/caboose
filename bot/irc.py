@@ -98,12 +98,12 @@ class irc_handler:
                     #source JOIN :#channel
                     parts = data.split(sep = ' ', maxsplit = 2)
                     real_source, real_channel = parts[0], parts[2]
-                    nick = real_source.split(sep = '!')[0]
+                    nick = real_source.split(sep = '!')[0][1:]
                     channel = line.split(sep = '#')[1]
 
                     if nick != self.NICK:
                         if self.CHANNELS["#" + channel].autoops:
-                            handler.COMMANDS['op'](self.NICK, channel, nick, self)
+                            self.COMMANDS['op'](self.NICK, "#" + channel, nick, self)
 
                 if "PRIVMSG" in line:
                     parts = data.split(sep=' ', maxsplit=3)
@@ -148,7 +148,7 @@ class irc_handler:
                             #invoke associated command or error
                             if command_ in self.COMMANDS:
                                 if (self.COMMANDS[command_].enabled and nick.lower() not in self.SETTINGS.ignore):
-                                    self.COMMANDS[command_](nick, channel, message, self)
+                                        self.COMMANDS[command_](nick, channel, message, self)
                             elif command_ == "reload":
                                 self.COMMANDS = bot.reload.reload_commands()
                             elif command_ == "source":
