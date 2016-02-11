@@ -45,6 +45,7 @@ def command(name, **options):
     return decorator
 
 def reload_commands():
+    #Loads all *.py files in plugins/ into cmd objects in the global commands dictionary
     print("Attempting to reload commands...")
     global commands
     commands = {}
