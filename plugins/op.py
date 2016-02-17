@@ -5,6 +5,7 @@ def op(nick, channel, message, handler):
 	for user in message.split():
             count += 1
 
+    #We need one 'o' for each person we are giving ops, i.e. +ooo nick1 nick2 nick3
 	for i in range(count):
             opstring += "o"
 	opstring += " "
