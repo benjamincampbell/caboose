@@ -25,6 +25,7 @@ def roulette(nick, channel, message, handler):
             #misfire! 1/100 chance to not fire. lucked out!
             chamber = ['click','click','click','click','click','bang']
             handler.privmsg(channel, '{}: misfire! reloading...'.format(nick))
+            handler.privmsg('twitch', '{} got a misfire! lucky!'.format(nick))
     else:
         #remove one click
         handler.privmsg(channel, '{}'.format(result))
