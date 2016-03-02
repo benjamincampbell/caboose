@@ -88,9 +88,11 @@ class irc_handler:
                     print(line)
                 except UnicodeEncodeError:
                     print("UnicodeEncodeError")
-
-                if "PING" == line.split()[0]:
-                    self.pong(line.split()[1])
+                try:
+                    if "PING" == line.split()[0]:
+                        self.pong(line.split()[1])
+                except IndexError:
+                    print("IndexError in listening for ping")
 
                 #Any other checks, such as userjoins, would go here
                 try:
