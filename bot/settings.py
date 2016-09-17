@@ -6,6 +6,7 @@ class ChannelOptions:
     def __init__(self):
         #set options to defaults
         self.autoops = False
+        self.autovoice = False
         self.spamlimit = False
         self.admins = ['twitch']
 
@@ -15,6 +16,14 @@ class ChannelOptions:
             return False
         else:
             self.autoops = True
+            return True
+
+    def toggle_autovoice(self):
+        if (self.autovoice):
+            self.autovoice = False
+            return False
+        else:
+            self.autovoice = True
             return True
 
     def toggle_spamlimit(self):

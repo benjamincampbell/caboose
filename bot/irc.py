@@ -106,6 +106,8 @@ class irc_handler:
                         if nick != self.NICK:
                             if self.CHANNELS["#" + channel].autoops:
                                 self.COMMANDS['op'](self.NICK, "#" + channel, nick, self)
+                            if self.CHANNELS["#" + channel].autovoice:
+                                self.COMMANDS['voice'](self.NICK, "#" + channel, nick, self)
                 except IndexError:
                     pass
 
