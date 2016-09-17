@@ -19,3 +19,8 @@ def toggle(nick, channel, message, handler):
                     handler.privmsg(channel, "Spam-limit enabled for channel {}".format(channel))
                 else:
                     handler.privmsg(channel, "Spam-limit disabled for channel {}".format(channel))
+            elif message == 'autovoice':
+                if handler.SETTINGS.channels[channel].toggle_autovoice():
+                    handler.privmsg(channel, "Auto-voice enabled for channel {}".format(channel))
+                else:
+                    handler.privmsg(channel, "Auto-voice disabled for channel {}".format(channel))
