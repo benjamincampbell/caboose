@@ -83,10 +83,10 @@ def ignorelist(nick, channel, message, handler):
 @command("kick", man = "[ADMIN ONLY] Kicks a user with a message. Usage: &kick <user> <message>")
 def kick(nick, channel, message, handler):
 
-	if (nick == handler.NICK) or (nick in handler.SETTINGS.globaladmins):
+    if (nick == handler.NICK) or (nick in handler.SETTINGS.globaladmins):
         if message.split()[0] == "set":
             handler.SETTINGS.channels[channel].autokick_message = message.split()[1:]
         else:
             handler.kick(channel, nick, message)
-	else:
-		handler.privmsg(channel, '{}: You don\'t have permission to do that'.format(nick))
+    else:
+        handler.privmsg(channel, '{}: You don\'t have permission to do that'.format(nick))
