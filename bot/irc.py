@@ -62,7 +62,7 @@ class irc_handler:
 
     def kick(self, channel, user, reason):
         """ Kick user from channel (if has ops)"""
-        self.sendraw("KICK %s %s %s\r\n" % (channel, user, reason))
+        self.sendraw("KICK %s %s :%s\r\n" % (channel, user, reason))
 
     def ping_update(self):
         pingupdate = datetime.datetime.now()
@@ -109,7 +109,7 @@ class irc_handler:
                             if self.CHANNELS["#" + channel].autovoice:
                                 self.COMMANDS['voice'](self.NICK, "#" + channel, nick, self)
                             if self.CHANNELS["#" + channel].autokick:
-                                self.kick(self, "#" + channel, nick, self.SETTINGS.channels[channel].autokick_message)
+                                self.kick("#" + channel, nick, self.SETTINGS.channels["#" + channel].autokick_message)
                 except IndexError:
                     pass
 
