@@ -7,6 +7,8 @@ class ChannelOptions:
         #set options to defaults
         self.autoops = False
         self.autovoice = False
+        self.autokick = False
+        self.autokick_message = "I knew it. We're all going to die. Starting with you."
         self.spamlimit = False
         self.admins = ['twitch']
 
@@ -24,6 +26,14 @@ class ChannelOptions:
             return False
         else:
             self.autovoice = True
+            return True
+        
+    def toggle_autokick(self):
+        if (self.autokick):
+            self.autokick = False
+            return False
+        else:
+            self.autokick = True
             return True
 
     def toggle_spamlimit(self):

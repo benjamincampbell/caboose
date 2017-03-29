@@ -1,4 +1,4 @@
-@command("admin", man = "Adds people to admin list. Admin only. Usage: &admin nick1 nick2")
+@command("admin", man = "[ADMIN ONLY] Adds people to admin list. Usage: &admin nick1 nick2")
 def admin(nick, channel, message, handler):
     if nick in handler.SETTINGS.globaladmins:
         toadmin = message.split()
@@ -9,7 +9,7 @@ def admin(nick, channel, message, handler):
     else:
         handler.privmsg(channel, '{}: You don\'t have permission to do that'.format(nick))
 
-@command("unadmin", man = "Removes people from admin list. Admin only. Usage: &unadmin nick1 nick2")
+@command("unadmin", man = "[ADMIN ONLY] Removes people from admin list. Usage: &unadmin nick1 nick2")
 def unadmin(nick, channel, message, handler):
     if nick in handler.SETTINGS.globaladmins:
         with open("globaladmins.txt", 'r') as f:
@@ -22,7 +22,7 @@ def unadmin(nick, channel, message, handler):
     else:
         handler.privmsg(channel, '{}: You don\'t have permission to do that'.format(nick))
 
-@command("join", man = "Makes Caboose join a channel. Admin only. Usage: &join #channel  (must type #)")
+@command("join", man = "[ADMIN ONLY] Makes Caboose join a channel. Usage: &join #channel  (must type #)")
 def join(nick, channel, message, handler):
     from bot.settings import ChannelOptions
 
@@ -30,24 +30,25 @@ def join(nick, channel, message, handler):
         if len(message.split()) == 1:
             handler.join(message)
             handler.CHANNELS[message] = ChannelOptions()
+            #I think I also need to have him make a channel options object for the new channel here
     else:
         handler.privmsg(channel, '{}: You don\'t have permission to do that'.format(nick))
 
-@command("leave", man = "Makes Caboose leave the current channel. Admin only. Usage: &leave")
+@command("leave", man = "[ADMIN ONLY] Makes Caboose leave the current channel. Usage: &leave")
 def leave(nick, channel, message, handler):
     if nick in handler.SETTINGS.globaladmins:
         handler.leave(channel)
     else:
         handler.privmsg(channel, '{}: You don\'t have permission to do that'.format(nick))
 
-@command("quit", man = "Makes Caboose quit. Usage: &quit")
+@command("quit", man = "[ADMIN ONLY] Makes Caboose quit. Usage: &quit")
 def quit(nick, channel, message, handler):
     if nick in handler.SETTINGS.globaladmins:
         quit()
     else:
         handler.privmsg(channel, '{}: You don\'t have permission to do that'.format(nick))
 
-@command("ignore", man = "Makes Caboose ignore one or more nicks. Admin only. Usage: &ignore nick1 nick2")
+@command("ignore", man = "[ADMIN ONLY] Makes Caboose ignore one or more nicks. Usage: &ignore nick1 nick2")
 def ignore(nick, channel, message, handler):
     if nick in handler.SETTINGS.globaladmins:
         toignore = message.split()
@@ -58,7 +59,7 @@ def ignore(nick, channel, message, handler):
     else:
         handler.privmsg(channel, '{}: You don\'t have permission to do that'.format(nick))
 
-@command("unignore", man = "Makes Caboose stop ignoring one or more nicks. Admin only. Usage: &unignore nick1 nick2")
+@command("unignore", man = "[ADMIN ONLY] Makes Caboose stop ignoring one or more nicks. Usage: &unignore nick1 nick2")
 def uningore(nick, channel, message, handler):
     if nick in handler.SETTINGS.globaladmins:
         with open("ignore.txt", 'r') as f:
@@ -72,9 +73,20 @@ def uningore(nick, channel, message, handler):
     else:
         handler.privmsg(channel, '{}: You don\'t have permission to do that'.format(nick))
 
-@command("ignorelist", man = "Prints the list of nicks Caboose ignores. Admin only. Usage: &ignorelist")
+@command("ignorelist", man = "[ADMIN ONLY] Prints the list of nicks Caboose ignores. Usage: &ignorelist")
 def ignorelist(nick, channel, message, handler):
     ignoring = ""
     for nick in handler.SETTINGS.ignore:
         ignoring += "{}, ".format(nick)
     handler.privmsg(channel, "Ignoring: {}".format(ignoring))
+    
+@command("kick", man = "[ADMIN ONLY] Kicks a user with a message. Usage: &kick <user> <message>")
+def kick(nick, channel, message, handler):
+
+	if (nick == handler.NICK) or (nick in handler.SETTINGS.globaladmins):
+        if message.split()[0] == "set":
+            handler.SETTINGS.channels[channel].autokick_message = message.split()[1:]
+        else:
+            handler.kick(channel, nick, message)
+	else:
+		handler.privmsg(channel, '{}: You don\'t have permission to do that'.format(nick))

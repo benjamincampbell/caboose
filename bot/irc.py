@@ -108,6 +108,8 @@ class irc_handler:
                                 self.COMMANDS['op'](self.NICK, "#" + channel, nick, self)
                             if self.CHANNELS["#" + channel].autovoice:
                                 self.COMMANDS['voice'](self.NICK, "#" + channel, nick, self)
+                            if self.CHANNELS["#" + channel].autokick:
+                                self.kick(self, "#" + channel, nick, self.SETTINGS.channels[channel].autokick_message)
                 except IndexError:
                     pass
 
@@ -138,7 +140,6 @@ class irc_handler:
 
                         #Must answer the call of duty
                         if message.strip() == "bot roll call":
-                            print(message)
                             self.privmsg(channel, "My name is Michael J. Caboose and I hate babies.")
 
                         #Check if we care about the msesage
