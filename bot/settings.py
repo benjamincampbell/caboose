@@ -1,16 +1,18 @@
 import configparser
 import os.path
 
-class ChannelOptions:
+class Channel:
     #object to hold options on a by-channel basis
     def __init__(self):
         #set options to defaults
+        self.name = ""
         self.autoops = False
         self.autovoice = False
         self.autokick = False
-        self.autokick_message = "I knew it. We're all going to die. Starting with you."
+        self.autokick_message = "I knew it. We're all going to die. Starting with you." #take from config file
         self.spamlimit = False
-        self.admins = ['twitch']
+        self.admins = [] #Take from config file
+        self.ignore = []
 
     def toggle_autoops(self):
         if (self.autoops):
@@ -62,10 +64,9 @@ class ChannelOptions:
 class Settings:
     #object to hold settings for Caboose
     def __init__(self):
-        self.ignore = []
         self.globaladmins = []
         self.config = {}
-        self.channels = {}
+        self.connections = {}
         self.update()
 
     def update(self):
@@ -109,3 +110,14 @@ class Settings:
                     dict2["#" + channel] = ChannelOptions()
         self.config = dict1
         self.channels = dict2
+
+class Connection:
+    """
+    Holds information about each server that Caboose will be connected to
+    """
+    def __init__(self):
+        self.HOST = Null
+        self.PORT = Null
+        self.PASS = Null #will be left blank in config if no pass, so this will stay null
+        self.CHANNELS = {}
+        

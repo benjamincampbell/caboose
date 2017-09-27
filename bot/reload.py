@@ -1,5 +1,6 @@
 import glob
 import os
+import logging
 
 class cmd(object):
     #basic command object, holds the command itself (func) and any special options such as man (opts)
@@ -34,9 +35,9 @@ class cmd(object):
 
 def command(name, **options):
     """ Command format example:
-    @command("echo", man = "Repeats back what is said. Syntax: " + handler.LEADER + "echo message")
-    def echo(nick, channel, message, handler):
-        handler.privmsg(channel, message)
+    @command("echo", man = "Repeats back what is said. Syntax: " + bot.LEADER + "echo message")
+    def echo(nick, channel, message, bot):
+        bot.privmsg(channel, message)
     """
     def decorator(function):
         global commands

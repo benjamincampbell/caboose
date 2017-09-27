@@ -1,9 +1,9 @@
 @command("pm", man = "Private Messages a user. No real purpose.")
-def pm(nick, channel, message, handler):
+def pm(nick, channel, message, bot):
     #!pm targetUser message
     try:
         targetUser = message.split()[0]
         pmessage = message.split(" ", 1)[1]
-        handler.privmsg(targetUser, '{}: {}'.format(nick, pmessage))
+        bot.privmsg(targetUser, '{}: {}'.format(nick, pmessage))
     except:
-        handler.privmsg(channel, '{}: Incorrect format, usage: pm user message')
+        bot.privmsg(channel, '{}: Incorrect format, usage: pm user message')

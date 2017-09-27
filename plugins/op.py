@@ -1,5 +1,5 @@
 @command("op", man = "Gives levels of ops to a user. -h to give half ops Usage: &ops [-h] user")
-def op(nick, channel, message, handler):
+def op(nick, channel, message, bot):
 	opstring = "+"
 	count = 0
 	for user in message.split():
@@ -12,7 +12,7 @@ def op(nick, channel, message, handler):
 	for user in message.split():
             opstring += "%s " % user
 
-	if (nick == handler.NICK) or (nick in handler.SETTINGS.globaladmins) :
-		handler.sendraw("MODE %s %s\r\n" % (channel, opstring))
+	if (nick == bot.NICK) or (nick in bot.SETTINGS.globaladmins) :
+		bot.sendraw("MODE %s %s\r\n" % (channel, opstring))
 	else:
-		handler.privmsg(channel, '{}: You don\'t have permission to do that'.format(nick))
+		bot.privmsg(channel, '{}: You don\'t have permission to do that'.format(nick))

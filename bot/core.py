@@ -2,17 +2,18 @@ import sys
 import socket
 import bot.reload
 import datetime
+import logging
 
-class irc_handler:
-    def __init__(self, settings, commands):
-        self.HOST = settings.config['host']
-        self.PORT = int(settings.config['port'])
+from . import reload
+from . import settings
+
+class caboose_bot:
+    def __init__(self):
         self.NICK = settings.config['nick']
-        self.CHANNELS = settings.channels
         self.LEADER = settings.config['leader']
-        self.COMMANDS = commands
-        self.SETTINGS = settings
-
+        self.COMMANDS = reload_commands
+        self.SETTINGS = settings.Settings()
+        
         self.pingcheck = datetime.datetime.now()
 
     def socket_connect(self, host, port):
