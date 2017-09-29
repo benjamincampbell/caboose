@@ -13,12 +13,12 @@ class caboose_bot:
         self.LEADER = settings.config['leader']
         self.COMMANDS = reload_commands
         self.SETTINGS = settings.Settings()
-        
-        self.pingcheck = datetime.datetime.now()
+        self.ACTIVE = False
 
     def socket_connect(self, host, port):
         self.SOCK = socket.socket()
         print("Connecting to server: {0}".format(host))
+        logging.info("Connecting to server: {0}")
         self.SOCK.connect((host, port))
 
     def recv(self):
@@ -40,6 +40,10 @@ class caboose_bot:
     def privmsg(self, channel, message):
         msg = "PRIVMSG %s :%s\r\n" % (channel, message)
         self.sendraw(msg)
+
+    def password(self, pwd):
+        """Sends password to IRC server"""
+        self.sendraw("PASS %s\r\n" % pwd)
 
     def nick(self, nickname):
         """Set IRC nick"""
@@ -65,15 +69,8 @@ class caboose_bot:
         """ Kick user from channel (if has ops)"""
         self.sendraw("KICK %s %s :%s\r\n" % (channel, user, reason))
 
-    def ping_update(self):
-        pingupdate = datetime.datetime.now()
-        diff = (pingupdate - self.pingcheck).seconds
-        if diff > 5:
-            return true
-
     def listen(self):
         #Initial connect, set nick, user, and join channels
-        #if self.ping_update():
         self.socket_connect(self.HOST, self.PORT)
         self.nick(self.NICK)
         self.user(self.NICK, self.NICK)
