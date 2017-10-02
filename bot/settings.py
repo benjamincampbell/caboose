@@ -1,5 +1,5 @@
-import configparser
 import os.path
+import yaml
 
 class Settings:
     #object to hold settings for Caboose
@@ -53,9 +53,9 @@ class Settings:
 
 class Channel:
     #object to hold options on a by-channel basis
-    def __init__(self):
+    def __init__(self, name):
         #set options to defaults
-        self.name = ""
+        self.name = name
         self.autoops = False
         self.autovoice = False
         self.autokick = False
@@ -120,6 +120,7 @@ class Connection:
         self.HOST = None
         self.PORT = None
         self.PASS = None #will be left blank in config if no pass, so this will stay null
+        self.SSL = None
         self.CONNECTED = None
         self.CHANNELS = {}
         

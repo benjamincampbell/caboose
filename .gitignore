@@ -41,4 +41,5 @@ Thumbs.db
 ####################
 reminders.txt
 ignore.txt
+config.yaml
 __pycache__/
