@@ -2,67 +2,45 @@ import os.path
 import yaml
 
 class Settings:
-    #object to hold settings for Caboose
+    """
+    Object to hold various global settings for Caboose
+    """
     def __init__(self):
         self.globaladmins = []
         self.config = {}
-        self.connections = {}
+        self.servers = {}
         self.update()
 
     def update(self):
-        #Updates all at once, separate methods in case only one needs updating
-        self.update_ignorelist()
-        self.update_globaladminlist()
-        self.update_config()
+        
         
     def update_ignorelist(self):
-        #Check and make sure a file is made if it doesn't exist
-        if (os.path.exists("ignore.txt")) == False:
-            with open("ignore.txt", 'w') as f:
-                pass
-        ignorelist = []
-        with open("ignore.txt", 'r') as f:
-            ignorelist = f.read().splitlines()
-        self.ignore = ignorelist
+        
 
     def update_globaladminlist(self):
-        if (os.path.exists("globaladmins.txt")) == False:
-            with open("globaladmins.txt", 'w') as f:
-                pass
-        adminlist = []
-        with open("globaladmins.txt", 'r') as f:
-            adminlist = f.read().splitlines()
-        self.globaladmins = adminlist
+
 
     def update_config(self):
-        #Uses configparser to load the config file
-        dict1 = {}
-        dict2 = {}
-        Config = configparser.ConfigParser()
-
-        Config.read("config.ini")
-        options = Config.options("Settings")
-        for option in options:
-            if option != "channels":
-                dict1[option] = Config.get("Settings", option)
-            else:
-                for channel in Config.get("Settings", option).split(','):
-                    dict2["#" + channel] = ChannelOptions()
-        self.config = dict1
-        self.channels = dict2
+        """
+        Load in data from config.yaml
+        """
 
 class Channel:
-    #object to hold options on a by-channel basis
+    """
+    Object to hold various channel-specific settings for Caboose
+    """
     def __init__(self, name):
-        #set options to defaults
         self.name = name
         self.autoops = False
         self.autovoice = False
         self.autokick = False
         self.autokick_message = "I knew it. We're all going to die... Starting with you." #take from config file
         self.spamlimit = False
-        self.admins = [] #Take from config file
+        self.admins = [] # Take from config file
         self.ignore = []
+        
+    def __str__(self):
+        return self.name
 
     def toggle_autoops(self):
         if (self.autoops):
@@ -112,14 +90,14 @@ class Channel:
 
 
 
-class Connection:
+class Server:
     """
     Holds information about each server that Caboose will be connected to
     """
     def __init__(self):
         self.HOST = None
         self.PORT = None
-        self.PASS = None #will be left blank in config if no pass, so this will stay null
+        self.PASS = None # will be left blank in config if no pass, so this will stay None
         self.SSL = None
         self.CONNECTED = None
         self.CHANNELS = {}
