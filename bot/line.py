@@ -17,12 +17,14 @@ class Line:
         self.raw = raw
         self.user = UserInfo()
     
-    def parse_line():
+    def parse_line(self):
         if self.raw[0] == ':':
-
             self.user.parse_user(self.raw.split(' ', 1)[0][1:])
         
 class UserInfo:
+    """
+    Object to hold the nick, user, and host information of a Line
+    """
     def __init__(self):
         self.nick = None
         self.user = None
@@ -31,7 +33,7 @@ class UserInfo:
     def __str__(self):
         return '{0}!{1}@{2}'.format(self.nick, self.user, self.host)
         
-    def parse_user(raw_user):
+    def parse_user(self, raw_user):
         match = re.search('^([^!]+)!([^@]+)@(.+)$', raw_user)
         if match:
             self.nick = match.group(1)
