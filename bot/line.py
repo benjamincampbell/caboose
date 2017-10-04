@@ -1,4 +1,5 @@
 import re
+import collections
 
 class Line:
     """
@@ -6,7 +7,7 @@ class Line:
     the raw data, and it will be decoded and created into a
     Line object containing the information about it.
     
-    Sample: :Twitch!~twitch@hostname.com PRIVMSG #channel :Test response
+    Sample: :Twitch!twitch@hostname.com PRIVMSG #channel :Test response
     """
     
     def __init__(self, raw):
@@ -18,8 +19,13 @@ class Line:
         self.user = UserInfo()
     
     def parse_line(self):
-        if self.raw[0] == ':':
-            self.user.parse_user(self.raw.split(' ', 1)[0][1:])
+        parts = collections.deque(self.raw.strip().split(' '))
+        if parts[0][0] == ':':
+            self.user.parse_user(parts.popleft())
+        self.type = parts.popleft()
+        self.channel = parts.popleft()
+        
+        
         
 class UserInfo:
     """
