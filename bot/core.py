@@ -22,20 +22,12 @@ class caboose_bot:
         self.SOCK.connect((host, port))
 
     def recv(self):
-        try:
             message = self.SOCK.recv(2048).decode("utf-8")
             return message
-        except:
-            print("A BAD THING HAPPENED IN recv()")
-            return "hush broke it"
-        
 
     def sendraw(self, string):
-        try:
             print(">" + string.strip())
             self.SOCK.send(string.encode())
-        except:
-            print("A BAD THING HAPPENED IN sendraw()")
 
     def privmsg(self, channel, message):
         msg = "PRIVMSG %s :%s\r\n" % (channel, message)
@@ -82,18 +74,11 @@ class caboose_bot:
             #The listen loop
             data = self.recv()
             for line in data.splitlines():
-                try:
                     print(line)
-                except UnicodeEncodeError:
-                    print("UnicodeEncodeError")
-                try:
                     if "PING" == line.split()[0]:
                         self.pong(line.split()[1])
-                except IndexError:
-                    print("IndexError in listening for ping")
 
                 #Any other checks, such as userjoins, would go here
-                try:
                     if "JOIN" == line.split()[1]:
                         #source JOIN :#channel
                         parts = data.split(sep = ' ', maxsplit = 2)
@@ -108,8 +93,6 @@ class caboose_bot:
                                 self.COMMANDS['voice'](self.NICK, "#" + channel, nick, self)
                             if self.CHANNELS["#" + channel].autokick:
                                 self.kick("#" + channel, nick, self.SETTINGS.channels["#" + channel].autokick_message)
-                except IndexError:
-                    pass
 
                 if "PRIVMSG" in line:
                     parts = data.split(sep=' ', maxsplit=3)

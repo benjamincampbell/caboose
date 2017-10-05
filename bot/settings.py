@@ -6,24 +6,40 @@ class Settings:
     Object to hold various global settings for Caboose
     """
     def __init__(self):
-        self.globaladmins = []
+        self.admins = []
         self.config = {}
         self.servers = {}
         self.update()
 
     def update(self):
-        
+        pass
         
     def update_ignorelist(self):
-        
+        pass
 
     def update_globaladminlist(self):
-
+        pass
 
     def update_config(self):
         """
         Load in data from config.yaml
         """
+        with open('config.yaml', 'r') as cfg:
+            raw_yaml = yaml.load(cfg)
+        
+    
+class Server:
+    """
+    Holds information about each server that Caboose will be connected to
+    """
+    def __init__(self):
+        self.HOST = None
+        self.PORT = None
+        self.PASS = None # will be left blank in config if no pass, so this will stay None
+        self.SSL = None
+        self.CONNECTED = None
+        self.CHANNELS = {}
+        
 
 class Channel:
     """
@@ -36,7 +52,7 @@ class Channel:
         self.autokick = False
         self.autokick_message = "I knew it. We're all going to die... Starting with you." #take from config file
         self.spamlimit = False
-        self.admins = [] # Take from config file
+        self.mods = [] # Take from config file
         self.ignore = []
         
     def __str__(self):
@@ -87,18 +103,3 @@ class Channel:
             return True
         else:
             return False
-
-
-
-class Server:
-    """
-    Holds information about each server that Caboose will be connected to
-    """
-    def __init__(self):
-        self.HOST = None
-        self.PORT = None
-        self.PASS = None # will be left blank in config if no pass, so this will stay None
-        self.SSL = None
-        self.CONNECTED = None
-        self.CHANNELS = {}
-        

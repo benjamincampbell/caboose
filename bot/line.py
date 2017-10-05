@@ -12,20 +12,30 @@ class Line:
     
     def __init__(self, raw):
         self.type = None
-        self.channel = None
         self.command = None
-        self.text = None
+        self.args = []
+        self.text = ''
         self.raw = raw
         self.user = UserInfo()
     
     def parse_line(self):
         parts = collections.deque(self.raw.strip().split(' '))
         if parts[0][0] == ':':
-            self.user.parse_user(parts.popleft())
+            self.user.parse_user(parts.popleft()[1:])
         self.type = parts.popleft()
-        self.channel = parts.popleft()
         
-        
+        txt = []
+        message = False
+        for p in parts:
+            if not message:
+                if p[0] == ':':
+                    message = True
+                    txt.append(p.strip()[1:])
+                else:
+                    self.args.append(p.strip())
+            else:
+                txt.append(p.strip())
+        self.text = ' '.join(txt)
         
 class UserInfo:
     """
