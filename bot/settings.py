@@ -6,7 +6,6 @@ class Settings:
     Object to hold various global settings for Caboose
     """
     def __init__(self):
-        self.admins = []
         self.config = {}
         self.servers = {}
         self.update()
@@ -24,21 +23,25 @@ class Settings:
         """
         Load in data from config.yaml
         """
-        with open('config.yaml', 'r') as cfg:
-            raw_yaml = yaml.load(cfg)
+        with open('config.yaml', 'r') as f:
+            self.config = yaml.load(f)
+            
+            
         
     
 class Server:
     """
     Holds information about each server that Caboose will be connected to
     """
-    def __init__(self):
-        self.HOST = None
-        self.PORT = None
-        self.PASS = None # will be left blank in config if no pass, so this will stay None
-        self.SSL = None
-        self.CONNECTED = None
-        self.CHANNELS = {}
+    def __init__(self, name, host, port, pwd, ssl, admins, channels):
+        self.NAME = name
+        self.HOST = host
+        self.PORT = port
+        self.PASS = pwd # will be left blank in config if no pass, so this will stay None
+        self.SSL = ssl
+        self.CONNECTED = False
+        self.ADMINS = admins
+        self.CHANNELS = channels
         
 
 class Channel:
