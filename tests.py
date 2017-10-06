@@ -1,9 +1,8 @@
 import unittest
 import yaml
-import pprint
 
 from bot.line import Line, UserInfo
-from bot.settings import Settings, Server, Channel
+from bot.connection import Server, Channel, Connection
 
 class TestIrcLineParsing(unittest.TestCase):
     
@@ -31,10 +30,11 @@ class TestIrcLineParsing(unittest.TestCase):
         
 class TestReadingConfig(unittest.TestCase):
     def test_reading_correct_yaml(self):
-        f = """settings:
+        f = """
+settings:
     nick: caboose
     leader: "!"
-connections:
+servers:
     test1:
         host: irc.testserver1.org
         port: 42697
@@ -52,33 +52,31 @@ connections:
         admins:
           - notlikethesoup
         channels:
-          - "#caboose" """
+          - "#caboose"
+          """
         cfg = yaml.load(f)
-        servers = {}
+        connections = {}
         
-        pp = pprint.PrettyPrinter(indent=4)
+        nick = cfg['settings']['nick']
+        leader = cfg['settings']['leader']
         
-        pp.pprint(cfg)
-        
-        for name, settings in cfg['connections'].items():
-            servers[name] = Server(name, **settings)
-            pp.pprint(vars(servers[name]))
+        for name, settings in cfg['servers'].items():
+            connections[name] = Connection(settings)
             
-        self.assertEqual(servers['test1'].NAME, 'test1')
-        self.assertEqual(servers['test1'].HOST, 'irc.testserver1.org')
-        self.assertEqual(servers['test1'].PORT, 42697)
-        self.assertEqual(servers['test1'].PASS, 'testpass')
-        self.assertEqual(servers['test1'].SSL, True)
-        self.assertEqual(servers['test1'].ADMINS, ['twitch'])
-        self.assertEqual(servers['test1'].CHANNELS, ['#caboose'])
+        self.assertEqual(nick, 'caboose')
+        self.assertEqual(leader, '!')
+            
+        self.assertEqual(connections['test1'].SERVER.HOST, 'irc.testserver1.org')
+        self.assertEqual(connections['test1'].SERVER.PORT, 42697)
+        self.assertEqual(connections['test1'].SERVER.PASS, 'testpass')
+        self.assertEqual(connections['test1'].SERVER.SSL, True)
+        self.assertEqual(connections['test1'].SERVER.ADMINS, ['twitch'])
         
-        self.assertEqual(servers['test2'].NAME, 'test2')
-        self.assertEqual(servers['test2'].HOST, 'irc.testserver2.org')
-        self.assertEqual(servers['test2'].PORT, 6667)
-        self.assertEqual(servers['test2'].PASS, None)
-        self.assertEqual(servers['test2'].SSL, False)
-        self.assertEqual(servers['test2'].ADMINS, ['notlikethesoup'])
-        self.assertEqual(servers['test2'].CHANNELS, ['#caboose'])
+        self.assertEqual(connections['test2'].SERVER.HOST, 'irc.testserver2.org')
+        self.assertEqual(connections['test2'].SERVER.PORT, 6667)
+        self.assertEqual(connections['test2'].SERVER.PASS, None)
+        self.assertEqual(connections['test2'].SERVER.SSL, False)
+        self.assertEqual(connections['test2'].SERVER.ADMINS, ['notlikethesoup'])
         
         
 if __name__ == '__main__':

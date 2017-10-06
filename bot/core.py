@@ -5,16 +5,31 @@ import datetime
 import logging
 
 from . import reload
-from . import settings
+from .connection import Connection
 
-class caboose_bot:
+class Bot:
     def __init__(self):
-        self.NICK = settings.config['nick']
-        self.LEADER = settings.config['leader']
+        self.NICK = ''
+        self.LEADER = ''
         self.COMMANDS = reload_commands
-        self.SETTINGS = settings.Settings()
+        self.CONNECTIONS = {}
         self.ACTIVE = False
+        
+    def read_config(self):
+        with open('config.yaml', 'r') as f:
+            cfg = yaml.load(f)
+            self.NICK = cfg['settings']['nick']
+            self.LEADER = cfg['settings']['leader']
+            for name, settings in self.config['servers'].items():
+                self.CONNECTIONS[name] = Connection(settings)
 
+
+    def make_connections(self, servers):
+        """
+        Make connections using the Server objects taken
+        from the config.yaml file
+        """
+        
     def socket_connect(self, host, port):
         self.SOCK = socket.socket()
         print("Connecting to server: {0}".format(host))
@@ -22,12 +37,12 @@ class caboose_bot:
         self.SOCK.connect((host, port))
 
     def recv(self):
-            message = self.SOCK.recv(2048).decode("utf-8")
-            return message
+        message = self.SOCK.recv(2048).decode("utf-8")
+        return message
 
     def sendraw(self, string):
-            print(">" + string.strip())
-            self.SOCK.send(string.encode())
+        print(">" + string.strip())
+        self.SOCK.send(string.encode())
 
     def privmsg(self, channel, message):
         msg = "PRIVMSG %s :%s\r\n" % (channel, message)
@@ -94,50 +109,50 @@ class caboose_bot:
                             if self.CHANNELS["#" + channel].autokick:
                                 self.kick("#" + channel, nick, self.SETTINGS.channels["#" + channel].autokick_message)
 
-                if "PRIVMSG" in line:
-                    parts = data.split(sep=' ', maxsplit=3)
-                    if len(parts) == 4:
-                        #Raw parts of the original message
-                        #source PRIVMSG target :message
-                        real_source = parts[0]
-                        real_target = parts[2]
-                        real_message = parts[3]
-
-                        #extract source user nickname
-                        # :nick!user@host
-                        nick = real_source.split(sep='!')[0][1:]
-
-                        #if a user PRIVMSGes us we appear as the target
-                        if real_target == self.NICK:
-                            channel = nick
-                        else:
-                            channel = real_target
-
-                        #Final parameter (message) is often prefixed with ':'
-                        if real_message.startswith(':'):
-                            message = real_message[1:]
-                        else:
-                            message = real_message
-
-                        #Must answer the call of duty
-                        if message.strip() == "bot roll call":
-                            self.privmsg(channel, "My name is Michael J. Caboose and I hate babies.")
-
-                        #Check if we care about the msesage
-                        if message.startswith(self.LEADER):
-                            parts = message.strip().split(sep=None, maxsplit=1)
-                            command_ = parts[0][len(self.LEADER):]
-                            #Give a default value for message if none is provided.
-                            if len(parts) == 2:
-                                message = parts[1]
+                    if "PRIVMSG" in line:
+                        parts = data.split(sep=' ', maxsplit=3)
+                        if len(parts) == 4:
+                            #Raw parts of the original message
+                            #source PRIVMSG target :message
+                            real_source = parts[0]
+                            real_target = parts[2]
+                            real_message = parts[3]
+    
+                            #extract source user nickname
+                            # :nick!user@host
+                            nick = real_source.split(sep='!')[0][1:]
+    
+                            #if a user PRIVMSGes us we appear as the target
+                            if real_target == self.NICK:
+                                channel = nick
                             else:
-                                message = ""
-                            
-                            #invoke associated command or error
-                            if command_ in self.COMMANDS:
-                                if (self.COMMANDS[command_].enabled and nick.lower() not in self.SETTINGS.ignore):
-                                        self.COMMANDS[command_](nick, channel, message, self)
-                            elif command_ == "reload":
-                                self.COMMANDS = bot.reload.reload_commands()
-                            elif command_ == "source":
-                                self.privmsg(channel, "http://github.com/benjamincampbell/caboose")
+                                channel = real_target
+    
+                            #Final parameter (message) is often prefixed with ':'
+                            if real_message.startswith(':'):
+                                message = real_message[1:]
+                            else:
+                                message = real_message
+    
+                            #Must answer the call of duty
+                            if message.strip() == "bot roll call":
+                                self.privmsg(channel, "My name is Michael J. Caboose and I hate babies.")
+    
+                            #Check if we care about the msesage
+                            if message.startswith(self.LEADER):
+                                parts = message.strip().split(sep=None, maxsplit=1)
+                                command_ = parts[0][len(self.LEADER):]
+                                #Give a default value for message if none is provided.
+                                if len(parts) == 2:
+                                    message = parts[1]
+                                else:
+                                    message = ""
+                                
+                                #invoke associated command or error
+                                if command_ in self.COMMANDS:
+                                    if (self.COMMANDS[command_].enabled and nick.lower() not in self.SETTINGS.ignore):
+                                            self.COMMANDS[command_](nick, channel, message, self)
+                                elif command_ == "reload":
+                                    self.COMMANDS = bot.reload.reload_commands()
+                                elif command_ == "source":
+                                    self.privmsg(channel, "http://github.com/benjamincampbell/caboose")
