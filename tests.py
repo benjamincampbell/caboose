@@ -66,6 +66,7 @@ connections:
             
         self.assertEqual(servers['test1'].NAME, 'test1')
         self.assertEqual(servers['test1'].HOST, 'irc.testserver1.org')
+        self.assertEqual(servers['test1'].PORT, 42697)
         self.assertEqual(servers['test1'].PASS, 'testpass')
         self.assertEqual(servers['test1'].SSL, True)
         self.assertEqual(servers['test1'].ADMINS, ['twitch'])
@@ -73,6 +74,7 @@ connections:
         
         self.assertEqual(servers['test2'].NAME, 'test2')
         self.assertEqual(servers['test2'].HOST, 'irc.testserver2.org')
+        self.assertEqual(servers['test2'].PORT, 6667)
         self.assertEqual(servers['test2'].PASS, None)
         self.assertEqual(servers['test2'].SSL, False)
         self.assertEqual(servers['test2'].ADMINS, ['notlikethesoup'])
