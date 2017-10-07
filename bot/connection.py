@@ -13,6 +13,9 @@ class Connection:
         self.SERVER = Server(**settings)
         self.CONNECTED = False
         
+        self.MODE = False
+        self.POSTMODE = False
+        
     def __str__(self):
         return '{0}:{1} -'.format(self.SERVER.HOST, self.SERVER.PORT)
         
@@ -45,6 +48,7 @@ class Connection:
         Send information to server
         """
         logging.info("{0} sendraw: {1}".format(self, string.encode()))
+        print('{0} SENDRAW: {1}'.format(self, string))
         self.SOCK.send(string.encode())
     
     def pwd(self):
@@ -120,8 +124,6 @@ class Server:
         self.NICKSERV = nickserv
         self.ADMINS = admins
         self.CHANNELS = {}
-        
-        self.
         
         for channel in channels:
             self.CHANNELS[channel] = Channel(channel)

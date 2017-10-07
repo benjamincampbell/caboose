@@ -39,23 +39,25 @@ class Bot:
         
         # Caboose needs to wait until after it receives a MODE message
         # before these can be sent
-        
-            if conn.SERVER.NICKSERV:
-                    conn.nickserv_reg(self.NICKSERV_PASS, self.NICKSERV_EMAIL)
-                    conn.nickserv_ident(self.NICKSERV_PASS)            
-            for key, chan in conn.SERVER.CHANNELS.items():
-                conn.join(chan)
-                conn.privmsg(chan, '{0} up and running.'.format(self.NICK))
+ 
 
         while 1:
             for name, conn in self.CONNECTIONS.items():
+                if conn.MODE and not conn.POSTMODE:
+                    if conn.SERVER.NICKSERV:
+                            conn.nickserv_reg(self.NICKSERV_PASS, self.NICKSERV_EMAIL)
+                            conn.nickserv_ident(self.NICKSERV_PASS)            
+                    for key, chan in conn.SERVER.CHANNELS.items():
+                        conn.join(chan)
+                        conn.privmsg(chan, '{0} up and running.'.format(self.NICK))
+                    conn.POSTMODE = True
                 data = conn.recv()
                 for l in data.splitlines():
                     line = Line(l)
                     line.parse_line(self.LEADER)
                     # print('{0} {1}'.format(conn, line))
                     if line.type == 'MODE':
-                        conn.MODE += 1
+                        conn.MODE = True
                     if line.type == 'PING':
                         conn.pong(line.text)
                     if line.type == 'PRIVMSG':       
