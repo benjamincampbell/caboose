@@ -8,6 +8,7 @@ class Line:
     Line object containing the information about it.
     
     Sample: :Twitch!twitch@hostname.com PRIVMSG #channel :Test response
+            :Twitch!twitch@hostname.com PRIVMSG #channel :!echo hello
     """
     
     def __init__(self, raw):
@@ -17,12 +18,20 @@ class Line:
         self.text = ''
         self.raw = raw
         self.user = UserInfo()
+        
+    def __str__(self):
+        return self.raw
     
-    def parse_line(self):
+    def parse_line(self, leader):
+        print(self.raw)
         parts = collections.deque(self.raw.strip().split(' '))
-        if parts[0][0] == ':':
-            self.user.parse_user(parts.popleft()[1:])
-        self.type = parts.popleft()
+        try:
+            if parts[0][0] == ':':
+                self.user.parse_user(parts.popleft()[1:])
+        except IndexError:
+            logging.warning('Problem parsing line, parts: {0}'.format(parts))
+        if parts:
+            self.type = parts.popleft()
         
         txt = []
         message = False
@@ -30,12 +39,16 @@ class Line:
             if not message:
                 if p[0] == ':':
                     message = True
-                    txt.append(p.strip()[1:])
+                    if p[1] == leader:
+                        self.command = p.strip()[2:]
+                    else:
+                        txt.append(p.strip()[1:])
                 else:
                     self.args.append(p.strip())
             else:
                 txt.append(p.strip())
         self.text = ' '.join(txt)
+        
         
 class UserInfo:
     """

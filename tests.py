@@ -8,25 +8,44 @@ class TestIrcLineParsing(unittest.TestCase):
     
     def test_normal_privmsg(self):
         l = Line(':Twitch!twitch@hostname.com PRIVMSG #channel :Test response')
-        l.parse_line()
+        l.parse_line('!')
+        
+        self.assertEqual(l.user.nick, 'Twitch')
+        self.assertEqual(l.user.user, 'twitch')
+        self.assertEqual(l.user.host, 'hostname.com')
         
         self.assertEqual(l.type, 'PRIVMSG')
         self.assertEqual(l.args, ['#channel'])
         self.assertEqual(l.command, None)
         self.assertEqual(l.text, 'Test response')
         
-        self.assertEqual(l.user.nick, 'Twitch')
-        self.assertEqual(l.user.user, 'twitch')
-        self.assertEqual(l.user.host, 'hostname.com')
-        
     def test_ping(self):
         l = Line('PING :irc.example.com')
-        l.parse_line()
+        l.parse_line('!')
         
         self.assertEqual(l.type, 'PING')
         self.assertEqual(l.args, [])
         self.assertEqual(l.command, None)
         self.assertEqual(l.text, 'irc.example.com')
+        
+    def test_command_privmsg(self):
+        l = Line(':Twitch!twitch@hostname.com PRIVMSG #channel :!echo hello church')
+        l.parse_line('!')
+        
+        self.assertEqual(l.user.nick, 'Twitch')
+        self.assertEqual(l.user.user, 'twitch')
+        self.assertEqual(l.user.host, 'hostname.com')
+        
+        self.assertEqual(l.type, 'PRIVMSG')
+        self.assertEqual(l.args, ['#channel'])
+        self.assertEqual(l.command, 'echo')
+        self.assertEqual(l.text, 'hello church')
+        
+    def test_mode(self):
+        l = Line(':caboose MODE caboose :+iwxz')
+        l.parse_line('!')
+        
+        self.assertEqual(l.type, 'MODE')
         
 class TestReadingConfig(unittest.TestCase):
     def test_reading_correct_yaml(self):
@@ -40,6 +59,7 @@ servers:
         port: 42697
         pwd: testpass
         ssl: true
+        nickserv: true
         admins:
           - twitch
         channels:
@@ -49,6 +69,7 @@ servers:
         port: 6667
         pwd: ~
         ssl: false
+        nickserv: true
         admins:
           - notlikethesoup
         channels:
