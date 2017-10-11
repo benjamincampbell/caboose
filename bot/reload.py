@@ -55,5 +55,6 @@ def reload_commands():
     for source in command_files:
         print("Loading {0}".format(source))
         logging.info("Loading {0}".format(source))
-        exec(compile(open(source, "U").read(), source, "exec"))
+        with open(source, 'r') as f:
+            exec(compile(f.read(), source, "exec"))
     return commands

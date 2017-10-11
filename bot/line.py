@@ -12,7 +12,8 @@ class Line:
             :Twitch!twitch@hostname.com PRIVMSG #channel :!echo hello
     """
     
-    def __init__(self, raw):
+    def __init__(self, conn, raw):
+        self.conn = conn
         self.type = None
         self.command = None
         self.args = []

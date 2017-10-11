@@ -9,4 +9,4 @@ if __name__ == "__main__":
 
     bot = bot.core.Bot()
 
-    bot.listen()
+    bot.run()

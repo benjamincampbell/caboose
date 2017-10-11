@@ -36,6 +36,13 @@ class Connection:
         logging.info("Disconnecting from server: {0}".format(self.SERVER.HOST))
         self.CONNECTED = False
         
+    def start(nickname, line_queue):
+            self.socket_connect()
+            if self.SERVER.PASS:
+                self.pwd()
+            self.nick(nickname)
+            self.user(nickname, nickname)     
+        
     def recv(self):
         """
         Receive data and return it
@@ -48,7 +55,6 @@ class Connection:
         Send information to server
         """
         logging.info("{0} sendraw: {1}".format(self, string.encode()))
-        print('{0} SENDRAW: {1}'.format(self, string))
         self.SOCK.send(string.encode())
     
     def pwd(self):
@@ -99,6 +105,14 @@ class Connection:
         Kick user from channel with reason
         """
         self.sendraw("KICK %s %s :%s\r\n" % (channel, user, reason))
+        
+    def initialize(self, nickserv_email, nickserv_pass, nick):
+        if self.SERVER.NICKSERV:
+            self.nickserv_reg(nickserv_email, nickserv_pass)
+            self.nickserv_ident(nickserv_pass)
+        for key, chan in self.SERVER.CHANNELS.items():
+            self.join(chan)
+            self.privmsg(chan, '{0} up and running.'.format(nick))
    
     def nickserv_reg(self, pwd, email):
         """

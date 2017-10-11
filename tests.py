@@ -3,6 +3,7 @@ import yaml
 
 from bot.line import Line, UserInfo
 from bot.connection import Server, Channel, Connection
+from bot.core import Bot
 
 class TestIrcLineParsing(unittest.TestCase):
     
@@ -98,6 +99,14 @@ servers:
         self.assertEqual(connections['test2'].SERVER.PASS, None)
         self.assertEqual(connections['test2'].SERVER.SSL, False)
         self.assertEqual(connections['test2'].SERVER.ADMINS, ['notlikethesoup'])
+        
+        
+class TestBotInitialization(unittest.TestCase):
+    
+    def test_init(self):
+        caboose = Bot()
+        
+        print(caboose.COMMANDS)
         
         
 if __name__ == '__main__':
