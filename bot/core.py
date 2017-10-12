@@ -49,8 +49,8 @@ class Bot(object):
                 if line.command:                                
                     # invoke associated command or error
                     if line.command in self.COMMANDS:
-                        if (self.COMMANDS[command_].enabled and nick.lower() not in self.SETTINGS.ignore):
-                                self.COMMANDS[command_](nick, channel, message, self)
+                        if (self.COMMANDS[line.command].enabled):
+                                self.COMMANDS[line.command](line)
                     elif line.command == "reload":
                         conn.COMMANDS = bot.reload.reload_commands()
                     elif line.command == "source":

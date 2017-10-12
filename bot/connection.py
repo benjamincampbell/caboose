@@ -46,7 +46,7 @@ class Connection(object):
             while True:
                 data = self.recv()
                 for l in data.splitlines():
-                    line = Line(l)
+                    line = Line(self, l)
                     line.parse_line(leader)
                     line_queue.put(line)
         

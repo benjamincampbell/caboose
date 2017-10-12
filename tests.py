@@ -8,7 +8,7 @@ from bot.core import Bot
 class TestIrcLineParsing(unittest.TestCase):
     
     def test_normal_privmsg(self):
-        l = Line(':Twitch!twitch@hostname.com PRIVMSG #channel :Test response')
+        l = Line('dummy conn', ':Twitch!twitch@hostname.com PRIVMSG #channel :Test response')
         l.parse_line('!')
         
         self.assertEqual(l.user.nick, 'Twitch')
@@ -21,7 +21,7 @@ class TestIrcLineParsing(unittest.TestCase):
         self.assertEqual(l.text, 'Test response')
         
     def test_ping(self):
-        l = Line('PING :irc.example.com')
+        l = Line('dummy conn', 'PING :irc.example.com')
         l.parse_line('!')
         
         self.assertEqual(l.type, 'PING')
@@ -30,7 +30,7 @@ class TestIrcLineParsing(unittest.TestCase):
         self.assertEqual(l.text, 'irc.example.com')
         
     def test_command_privmsg(self):
-        l = Line(':Twitch!twitch@hostname.com PRIVMSG #channel :!echo hello church')
+        l = Line('dummy conn', ':Twitch!twitch@hostname.com PRIVMSG #channel :!echo hello church')
         l.parse_line('!')
         
         self.assertEqual(l.user.nick, 'Twitch')
@@ -43,7 +43,7 @@ class TestIrcLineParsing(unittest.TestCase):
         self.assertEqual(l.text, 'hello church')
         
     def test_mode(self):
-        l = Line(':caboose MODE caboose :+iwxz')
+        l = Line('dummy conn', ':caboose MODE caboose :+iwxz')
         l.parse_line('!')
         
         self.assertEqual(l.type, 'MODE')
