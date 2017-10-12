@@ -3,7 +3,7 @@ import socket
 import logging
 from .line import Line
 
-class Connection:
+class Connection(object):
     """
     Represents a connection to a server
     """
@@ -36,12 +36,19 @@ class Connection:
         logging.info("Disconnecting from server: {0}".format(self.SERVER.HOST))
         self.CONNECTED = False
         
-    def start(nickname, line_queue):
+    def start(self, leader, nickname, line_queue):
             self.socket_connect()
             if self.SERVER.PASS:
                 self.pwd()
             self.nick(nickname)
-            self.user(nickname, nickname)     
+            self.user(nickname, nickname)
+            
+            while True:
+                data = self.recv()
+                for l in data.splitlines():
+                    line = Line(l)
+                    line.parse_line(leader)
+                    line_queue.put(line)
         
     def recv(self):
         """
@@ -126,7 +133,7 @@ class Connection:
         """
         self.privmsg('nickserv', 'IDENTIFY {0}'.format(pwd))
     
-class Server:
+class Server(object):
     """
     Holds information about each server that Caboose will be connected to
     """
@@ -143,7 +150,7 @@ class Server:
             self.CHANNELS[channel] = Channel(channel)
         
 
-class Channel:
+class Channel(object):
     """
     Object to hold various channel-specific settings for Caboose
     """
