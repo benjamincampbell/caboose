@@ -27,8 +27,11 @@ class Bot(object):
             self.LEADER = cfg['settings']['leader']
             self.NICKSERV_EMAIL = cfg['settings']['email']
             self.NICKSERV_PASS = cfg['settings']['pwd']
-            for name, settings in cfg['servers'].items():
-                self.CONNECTIONS[name] = Connection(settings)
+            self.create_connections(cfg)
+                
+    def create_connections(self, cfg):
+        for name, settings in cfg['servers'].items():
+            self.CONNECTIONS[name] = Connection(settings)
 
     def run(self):
         line_queue = queue.Queue()
