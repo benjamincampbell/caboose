@@ -42,9 +42,9 @@ class Bot(object):
         while 1:
             line = line_queue.get()
             if line.type == 'MODE':
-                conn.initialize(self.NICKSERV_EMAIL, self.NICKSERV_PASS, self.NICK)
+                line.conn.initialize(self.NICKSERV_EMAIL, self.NICKSERV_PASS, self.NICK)
             elif line.type == 'PING':
-                conn.pong(line.text)
+                line.conn.pong(line.text)
             elif line.type == 'PRIVMSG':       
                 if line.command:                                
                     # invoke associated command or error
