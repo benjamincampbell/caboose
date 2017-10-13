@@ -1,16 +1,13 @@
-@command("admin", man = "[ADMIN ONLY] Adds people to admin list. Usage: &admin nick1 nick2")
-def admin(line):
-    if nick in bot.SETTINGS.globaladmins:
-        toadmin = message.split()
-        with open("globaladmins.txt", 'a') as f:
-            for nick in toadmin:
-                f.write('{}\n'.format(nick))
-        bot.SETTINGS.update_adminlist()
+@command("admin", man = "[ADMIN ONLY] Adds people to admin list. Usage: {leader}{command} nick1 nick2")
+def admin(bot, line):
+    if line.user.nick in line.conn.SERVER.ADMINS:
+        if line.text.split() == 1:
+            
     else:
         bot.privmsg(channel, '{}: You don\'t have permission to do that'.format(nick))
 
-@command("unadmin", man = "[ADMIN ONLY] Removes people from admin list. Usage: &unadmin nick1 nick2")
-def unadmin(line):
+@command("unadmin", man = "[ADMIN ONLY] Removes people from admin list. Usage: {leader}{command} nick1 nick2")
+def unadmin(bot, line):
     if nick in bot.SETTINGS.globaladmins:
         with open("globaladmins.txt", 'r') as f:
             adminlist = f.read().splitlines()
@@ -22,8 +19,8 @@ def unadmin(line):
     else:
         bot.privmsg(channel, '{}: You don\'t have permission to do that'.format(nick))
 
-@command("join", man = "[ADMIN ONLY] Makes Caboose join a channel. Usage: &join #channel  (must type #)")
-def join(line):
+@command("join", man = "[ADMIN ONLY] Makes Caboose join a channel. Usage: {leader}{command} #channel  (must type #)")
+def join(bot, line):
     from bot.connection import Channel
     if line.user.nick in line.conn.SERVER.ADMINS:
         if len(line.text.split()) == 1:
@@ -33,21 +30,21 @@ def join(line):
     else:
         line.conn.privmsg(channel, '{}: You don\'t have permission to do that'.format(nick))
 
-@command("leave", man = "[ADMIN ONLY] Makes Caboose leave the current channel. Usage: &leave")
+@command("leave", man = "[ADMIN ONLY] Makes Caboose leave the current channel. Usage: {leader}{command}")
 def leave(line):
     if nick in bot.SETTINGS.globaladmins:
         bot.leave(channel)
     else:
         bot.privmsg(channel, '{}: You don\'t have permission to do that'.format(nick))
 
-@command("quit", man = "[ADMIN ONLY] Makes Caboose quit. Usage: &quit")
+@command("quit", man = "[ADMIN ONLY] Makes Caboose quit. Usage: {leader}{command}")
 def quit(line):
     if nick in bot.SETTINGS.globaladmins:
         quit()
     else:
         bot.privmsg(channel, '{}: You don\'t have permission to do that'.format(nick))
 
-@command("ignore", man = "[ADMIN ONLY] Makes Caboose ignore one or more nicks. Usage: &ignore nick1 nick2")
+@command("ignore", man = "[ADMIN ONLY] Makes Caboose ignore one or more nicks. Usage: {leader}{command} nick1 nick2")
 def ignore(line):
     if nick in bot.SETTINGS.globaladmins:
         toignore = message.split()
@@ -58,7 +55,7 @@ def ignore(line):
     else:
         bot.privmsg(channel, '{}: You don\'t have permission to do that'.format(nick))
 
-@command("unignore", man = "[ADMIN ONLY] Makes Caboose stop ignoring one or more nicks. Usage: &unignore nick1 nick2")
+@command("unignore", man = "[ADMIN ONLY] Makes Caboose stop ignoring one or more nicks. Usage: {leader}{command} nick1 nick2")
 def uningore(line):
     if nick in bot.SETTINGS.globaladmins:
         with open("ignore.txt", 'r') as f:
@@ -72,14 +69,14 @@ def uningore(line):
     else:
         bot.privmsg(channel, '{}: You don\'t have permission to do that'.format(nick))
 
-@command("ignorelist", man = "[ADMIN ONLY] Prints the list of nicks Caboose ignores. Usage: &ignorelist")
+@command("ignorelist", man = "[ADMIN ONLY] Prints the list of nicks Caboose ignores. Usage: {leader}{command}")
 def ignorelist(line):
     ignoring = ""
     for nick in bot.SETTINGS.ignore:
         ignoring += "{}, ".format(nick)
     bot.privmsg(channel, "Ignoring: {}".format(ignoring))
     
-@command("kick", man = "[ADMIN ONLY] Kicks a user with a message. Usage: &kick <user> <message>")
+@command("kick", man = "[ADMIN ONLY] Kicks a user with a message. Usage: {leader}{command} <user> <message>")
 def kick(line):
 
     if (nick == bot.NICK) or (nick in bot.SETTINGS.globaladmins):

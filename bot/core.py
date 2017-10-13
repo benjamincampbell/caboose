@@ -5,7 +5,7 @@ import time
 import threading
 import queue
 
-from .reload import reload_commands
+from .command import reload_commands
 from .connection import Connection
 from .line import Line
 
@@ -17,8 +17,7 @@ class Bot(object):
         self.NICKSERV_PASS = ''
         self.COMMANDS = reload_commands()
         self.CONNECTIONS = {}
-        
-        self.read_config()
+        self.CFG = read_config()
         
     def read_config(self):
         with open('config.yaml', 'r') as f:
@@ -28,6 +27,12 @@ class Bot(object):
             self.NICKSERV_EMAIL = cfg['settings']['email']
             self.NICKSERV_PASS = cfg['settings']['pwd']
             self.create_connections(cfg)
+            
+        return cfg
+    
+    def update_config(self):
+        with open('config.yaml', 'w') as f:
+            yaml.dump(cfg, f)
                 
     def create_connections(self, cfg):
         for name, settings in cfg['servers'].items():
@@ -53,7 +58,7 @@ class Bot(object):
                     # invoke associated command or error
                     if line.command in self.COMMANDS:
                         if (self.COMMANDS[line.command].enabled):
-                                self.COMMANDS[line.command](line)
+                                self.COMMANDS[line.command](self, line)
                     elif line.command == "reload":
                         conn.COMMANDS = bot.reload.reload_commands()
                     elif line.command == "source":
