@@ -36,15 +36,17 @@ def quit(bot, line):
 @command("ignore", man = "[ADMIN ONLY] Makes Caboose ignore one or more nicks. Usage: {leader}{command} nick1 nick2")
 def ignore(bot, line):
     if line.user.nick in line.conn.SERVER.ADMINS:
-        if len(line.text.split()) == 1:
-            bot.CFG['servers'][line.conn.SERVER.NAME]['ignore'].append(line.text.strip())
+        if len(line.text.split()) >= 1:
+            for user in line.text.split():
+                bot.CFG['servers'][line.conn.SERVER.NAME]['ignore'].append(user.strip())
             bot.update_config()
 
 @command("unignore", man = "[ADMIN ONLY] Makes Caboose stop ignoring one or more nicks. Usage: {leader}{command} nick1 nick2")
 def uningore(bot, line):
     if line.user.nick in line.conn.SERVER.ADMINS:
-        if len(line.text.split()) == 1:
-            bot.CFG['servers'][line.conn.SERVER.NAME]['ignore'].remove(line.text.strip())
+        if len(line.text.split()) >= 1:
+            for user in line.text.split():
+                bot.CFG['servers'][line.conn.SERVER.NAME]['ignore'].remove(user.strip())
             bot.update_config()
 
 @command("ignorelist", man = "[ADMIN ONLY] Prints the list of nicks Caboose ignores. Usage: {leader}{command}")
