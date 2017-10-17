@@ -1,4 +1,4 @@
-import bot.reload
+import bot.command
 import bot.core
 import logging
 import os

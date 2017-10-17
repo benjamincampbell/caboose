@@ -8,13 +8,10 @@ class Connection(object):
     Represents a connection to a server
     """
     
-    def __init__(self, settings):
+    def __init__(self, name, settings):
         self.SOCK = None
-        self.SERVER = Server(**settings)
+        self.SERVER = Server(name, **settings)
         self.CONNECTED = False
-        
-        self.MODE = False
-        self.POSTMODE = False
         
     def __str__(self):
         return '{0}:{1} -'.format(self.SERVER.HOST, self.SERVER.PORT)
@@ -115,17 +112,10 @@ class Connection(object):
         
     def initialize(self, nickserv_email, nickserv_pass, nick):
         if self.SERVER.NICKSERV:
-            self.nickserv_reg(nickserv_email, nickserv_pass)
             self.nickserv_ident(nickserv_pass)
         for key, chan in self.SERVER.CHANNELS.items():
             self.join(chan)
             self.privmsg(chan, '{0} up and running.'.format(nick))
-   
-    def nickserv_reg(self, pwd, email):
-        """
-        Sends a message to register with Nickserv
-        """
-        self.privmsg('nickserv', 'REGISTER {0} {1}'.format(pwd, email))
         
     def nickserv_ident(self, pwd):
         """
@@ -137,7 +127,8 @@ class Server(object):
     """
     Holds information about each server that Caboose will be connected to
     """
-    def __init__(self, host, port, pwd, ssl, nickserv, admins, channels):
+    def __init__(self, name, host, port, pwd, ssl, nickserv, admins, channels, ignore):
+        self.NAME = name
         self.HOST = host
         self.PORT = port
         self.PASS = pwd # will be left blank in config if no pass, so this will be None
@@ -145,9 +136,13 @@ class Server(object):
         self.NICKSERV = nickserv
         self.ADMINS = admins
         self.CHANNELS = {}
+        self.IGNORE = ignore
         
         for channel in channels:
             self.CHANNELS[channel] = Channel(channel)
+            
+    def __str__(self):
+        return self.NAME
         
 
 class Channel(object):
@@ -160,7 +155,6 @@ class Channel(object):
         self.autovoice = False
         self.spamlimit = False
         self.mods = []
-        self.ignore = []
         
     def __str__(self):
         return self.name

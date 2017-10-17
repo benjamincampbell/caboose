@@ -1,4 +1,4 @@
-from bot.reload import command
+from bot.command import command
 
 @command("echo", man = "Repeats back what is said. Syntax:  &echo message")
 def echo(line):

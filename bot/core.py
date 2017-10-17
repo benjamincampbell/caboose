@@ -1,9 +1,10 @@
-import bot.reload
+import bot.command
 import logging
 import yaml
 import time
 import threading
 import queue
+import os
 
 from .command import reload_commands
 from .connection import Connection
@@ -17,7 +18,7 @@ class Bot(object):
         self.NICKSERV_PASS = ''
         self.COMMANDS = reload_commands()
         self.CONNECTIONS = {}
-        self.CFG = read_config()
+        self.CFG = self.read_config()
         
     def read_config(self):
         with open('config.yaml', 'r') as f:
@@ -31,12 +32,13 @@ class Bot(object):
         return cfg
     
     def update_config(self):
+        os.remove('config.yaml')
         with open('config.yaml', 'w') as f:
-            yaml.dump(cfg, f)
+            yaml.dump(self.CFG, f, default_flow_style=False)
                 
     def create_connections(self, cfg):
         for name, settings in cfg['servers'].items():
-            self.CONNECTIONS[name] = Connection(settings)
+            self.CONNECTIONS[name] = Connection(name, settings)
 
     def run(self):
         line_queue = queue.Queue()
@@ -58,9 +60,10 @@ class Bot(object):
                     # invoke associated command or error
                     if line.command in self.COMMANDS:
                         if (self.COMMANDS[line.command].enabled):
-                                self.COMMANDS[line.command](self, line)
+                            logging.info('{0}: {1} called {2} command with args: {3}'.format(line.conn.SERVER.HOST, line.user, line.command, line.text))
+                            self.COMMANDS[line.command](self, line)
                     elif line.command == "reload":
-                        conn.COMMANDS = bot.reload.reload_commands()
+                        line.conn.COMMANDS = bot.command.reload_commands()
                     elif line.command == "source":
                         conn.privmsg(channel, "http://github.com/benjamincampbell/caboose")
             line_queue.task_done()

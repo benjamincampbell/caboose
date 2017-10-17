@@ -47,13 +47,11 @@ def command(name, **options):
 
 def reload_commands():
     #Loads all *.py files in plugins/ into cmd objects in the global commands dictionary
-    print("Attempting to reload commands...")
     logging.info("Reloading commands")
     global commands
     commands = {}
     command_files = glob.glob(os.path.join("plugins", "*.py"))
     for source in command_files:
-        print("Loading {0}".format(source))
         logging.info("Loading {0}".format(source))
         with open(source, 'r') as f:
             exec(compile(f.read(), source, "exec"))

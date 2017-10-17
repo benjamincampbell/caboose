@@ -65,6 +65,7 @@ servers:
           - twitch
         channels:
           - "#caboose"
+        ignore: []
     test2:
         host: irc.testserver2.org
         port: 6667
@@ -75,6 +76,7 @@ servers:
           - notlikethesoup
         channels:
           - "#caboose"
+        ignore: []
           """
         cfg = yaml.load(f)
         connections = {}
@@ -83,17 +85,19 @@ servers:
         leader = cfg['settings']['leader']
         
         for name, settings in cfg['servers'].items():
-            connections[name] = Connection(settings)
+            connections[name] = Connection(name, settings)
             
         self.assertEqual(nick, 'caboose')
         self.assertEqual(leader, '!')
-            
+        
+        self.assertEqual(connections['test1'].SERVER.NAME, 'test1')
         self.assertEqual(connections['test1'].SERVER.HOST, 'irc.testserver1.org')
         self.assertEqual(connections['test1'].SERVER.PORT, 42697)
         self.assertEqual(connections['test1'].SERVER.PASS, 'testpass')
         self.assertEqual(connections['test1'].SERVER.SSL, True)
         self.assertEqual(connections['test1'].SERVER.ADMINS, ['twitch'])
         
+        self.assertEqual(connections['test2'].SERVER.NAME, 'test2')
         self.assertEqual(connections['test2'].SERVER.HOST, 'irc.testserver2.org')
         self.assertEqual(connections['test2'].SERVER.PORT, 6667)
         self.assertEqual(connections['test2'].SERVER.PASS, None)
