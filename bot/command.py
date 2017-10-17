@@ -1,5 +1,6 @@
 import glob
 import os
+import logging
 
 class cmd(object):
     #basic command object, holds the command itself (func) and any special options such as man (opts)
@@ -34,9 +35,9 @@ class cmd(object):
 
 def command(name, **options):
     """ Command format example:
-    @command("echo", man = "Repeats back what is said. Syntax: " + handler.LEADER + "echo message")
-    def echo(nick, channel, message, handler):
-        handler.privmsg(channel, message)
+    @command("echo", man = "Repeats back what is said. Syntax: " + bot.LEADER + "echo message")
+    def echo(nick, channel, message, bot):
+        bot.privmsg(channel, message)
     """
     def decorator(function):
         global commands
@@ -46,11 +47,16 @@ def command(name, **options):
 
 def reload_commands():
     #Loads all *.py files in plugins/ into cmd objects in the global commands dictionary
-    print("Attempting to reload commands...")
+    logging.info("Reloading commands")
     global commands
     commands = {}
     command_files = glob.glob(os.path.join("plugins", "*.py"))
     for source in command_files:
-        print("Loading {0}".format(source))
-        exec(compile(open(source, "U").read(), source, "exec"))
+        logging.info("Loading {0}".format(source))
+        with open(source, 'r') as f:
+            exec(compile(f.read(), source, "exec"))
     return commands
+
+def decorate_mans(leader, commands):
+    for key, command in commands.items():
+        commands[key].man = commands[key].man.format(leader=leader, command=key)

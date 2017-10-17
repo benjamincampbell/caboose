@@ -1,92 +1,67 @@
-@command("admin", man = "[ADMIN ONLY] Adds people to admin list. Usage: &admin nick1 nick2")
-def admin(nick, channel, message, handler):
-    if nick in handler.SETTINGS.globaladmins:
-        toadmin = message.split()
-        with open("globaladmins.txt", 'a') as f:
-            for nick in toadmin:
-                f.write('{}\n'.format(nick))
-        handler.SETTINGS.update_adminlist()
-    else:
-        handler.privmsg(channel, '{}: You don\'t have permission to do that'.format(nick))
+@command("admin", man = "[ADMIN ONLY] Adds people to admin list. Usage: {leader}{command} nick1 nick2")
+def admin(bot, line):
+    import yaml
+    if line.user.nick in line.conn.SERVER.ADMINS:
+        if len(line.text.split()) == 1:
+            bot.CFG['servers'][line.conn.SERVER.NAME]['admins'].append(line.text.strip())
+            bot.update_config()
 
-@command("unadmin", man = "[ADMIN ONLY] Removes people from admin list. Usage: &unadmin nick1 nick2")
-def unadmin(nick, channel, message, handler):
-    if nick in handler.SETTINGS.globaladmins:
-        with open("globaladmins.txt", 'r') as f:
-            adminlist = f.read().splitlines()
-        with open("globaladmins.txt", 'w') as f:
-            for nick in adminlist:
-                if nick not in message.split():
-                    f.write("{}\n".format(nick))
-        handler.SETTINGS.update_adminlist()
-    else:
-        handler.privmsg(channel, '{}: You don\'t have permission to do that'.format(nick))
+@command("unadmin", man = "[ADMIN ONLY] Removes people from admin list. Usage: {leader}{command} nick1 nick2")
+def unadmin(bot, line):
+    if line.user.nick in line.conn.SERVER.ADMINS:
+        if len(line.text.split()) == 1:
+            bot.CFG['servers'][line.conn.SERVER.NAME]['admins'].remove(line.text.strip())
+            bot.update_config()
 
-@command("join", man = "[ADMIN ONLY] Makes Caboose join a channel. Usage: &join #channel  (must type #)")
-def join(nick, channel, message, handler):
-    from bot.settings import ChannelOptions
-
-    if nick in handler.SETTINGS.globaladmins:
-        if len(message.split()) == 1:
-            handler.join(message)
-            handler.CHANNELS[message] = ChannelOptions()
+@command("join", man = "[ADMIN ONLY] Makes Caboose join a channel. Usage: {leader}{command} #channel  (must type #)")
+def join(bot, line):
+    from bot.connection import Channel
+    if line.user.nick in line.conn.SERVER.ADMINS:
+        if len(line.text.split()) == 1:
+            line.conn.join(line.text)
+            line.conn.SERVER.CHANNELS[line.text] = Channel(line.text)
             #I think I also need to have him make a channel options object for the new channel here
-    else:
-        handler.privmsg(channel, '{}: You don\'t have permission to do that'.format(nick))
 
-@command("leave", man = "[ADMIN ONLY] Makes Caboose leave the current channel. Usage: &leave")
-def leave(nick, channel, message, handler):
-    if nick in handler.SETTINGS.globaladmins:
-        handler.leave(channel)
-    else:
-        handler.privmsg(channel, '{}: You don\'t have permission to do that'.format(nick))
+@command("leave", man = "[ADMIN ONLY] Makes Caboose leave the current channel. Usage: {leader}{command}")
+def leave(bot, line):
+    if line.user.nick in line.conn.SERVER.ADMINS:
+        if line.text == '':
+            line.conn.leave(line.args[0])
 
-@command("quit", man = "[ADMIN ONLY] Makes Caboose quit. Usage: &quit")
-def quit(nick, channel, message, handler):
-    if nick in handler.SETTINGS.globaladmins:
+@command("quit", man = "[ADMIN ONLY] Makes Caboose quit. Usage: {leader}{command}")
+def quit(bot, line):
+    if line.user.nick in line.conn.SERVER.ADMINS:
         quit()
-    else:
-        handler.privmsg(channel, '{}: You don\'t have permission to do that'.format(nick))
 
-@command("ignore", man = "[ADMIN ONLY] Makes Caboose ignore one or more nicks. Usage: &ignore nick1 nick2")
-def ignore(nick, channel, message, handler):
-    if nick in handler.SETTINGS.globaladmins:
-        toignore = message.split()
-        with open("ignore.txt", 'a') as f:
-            for nick in toignore:
-                f.write('{}\n'.format(nick))
-        handler.SETTINGS.update_ignorelist()
-    else:
-        handler.privmsg(channel, '{}: You don\'t have permission to do that'.format(nick))
+@command("ignore", man = "[ADMIN ONLY] Makes Caboose ignore one or more nicks. Usage: {leader}{command} nick1 nick2")
+def ignore(bot, line):
+    if line.user.nick in line.conn.SERVER.ADMINS:
+        if len(line.text.split()) >= 1:
+            for user in line.text.split():
+                bot.CFG['servers'][line.conn.SERVER.NAME]['ignore'].append(user.strip())
+            bot.update_config()
 
-@command("unignore", man = "[ADMIN ONLY] Makes Caboose stop ignoring one or more nicks. Usage: &unignore nick1 nick2")
-def uningore(nick, channel, message, handler):
-    if nick in handler.SETTINGS.globaladmins:
-        with open("ignore.txt", 'r') as f:
-            ignorelist = f.read().splitlines()
-            print(ignorelist)
-        with open("ignore.txt", 'w') as f:
-            for nick in ignorelist:
-                if nick not in message.split():
-                    f.write("{}\n".format(nick))
-        handler.SETTINGS.update_ignorelist()
-    else:
-        handler.privmsg(channel, '{}: You don\'t have permission to do that'.format(nick))
+@command("unignore", man = "[ADMIN ONLY] Makes Caboose stop ignoring one or more nicks. Usage: {leader}{command} nick1 nick2")
+def uningore(bot, line):
+    if line.user.nick in line.conn.SERVER.ADMINS:
+        if len(line.text.split()) >= 1:
+            for user in line.text.split():
+                bot.CFG['servers'][line.conn.SERVER.NAME]['ignore'].remove(user.strip())
+            bot.update_config()
 
-@command("ignorelist", man = "[ADMIN ONLY] Prints the list of nicks Caboose ignores. Usage: &ignorelist")
-def ignorelist(nick, channel, message, handler):
-    ignoring = ""
-    for nick in handler.SETTINGS.ignore:
-        ignoring += "{}, ".format(nick)
-    handler.privmsg(channel, "Ignoring: {}".format(ignoring))
+@command("ignorelist", man = "[ADMIN ONLY] Prints the list of nicks Caboose ignores. Usage: {leader}{command}")
+def ignorelist(bot, line):
+    ignoring = ' '.join(n for n in bot.CFG['servers'][line.conn.SERVER.NAME]['ignore'])
+    line.conn.privmsg(line.args[0], "Ignoring: {}".format(ignoring))
     
-@command("kick", man = "[ADMIN ONLY] Kicks a user with a message. Usage: &kick <user> <message>")
-def kick(nick, channel, message, handler):
-
-    if (nick == handler.NICK) or (nick in handler.SETTINGS.globaladmins):
-        if message.split()[0] == "set":
-            handler.SETTINGS.channels[channel].autokick_message = message.split()[1:]
-        else:
-            handler.kick(channel, nick, message)
-    else:
-        handler.privmsg(channel, '{}: You don\'t have permission to do that'.format(nick))
+@command("kick", man = "[ADMIN ONLY] Kicks a user with a message. Usage: {leader}{command} <user> <message>")
+def kick(bot, line):
+    if (line.user.nick in line.conn.SERVER.ADMINS):
+        if (len(line.text.split()) == 1):
+            u = line.text.strip()
+            m = ''
+            line.conn.kick(line.args[0], u, m)
+        elif (len(line.text.split()) > 1):
+            u, m = line.text.split(' ', 1)
+            line.conn.kick(line.args[0], u, m)
+            

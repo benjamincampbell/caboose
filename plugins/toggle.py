@@ -1,31 +1,31 @@
-@command("toggle", man = "Toggles a command on or off. Admin only")
-def toggle(nick, channel, message, handler):
-    if nick in handler.SETTINGS.globaladmins:
-        if message in handler.COMMANDS:
+@command("toggle", man = "[ADMIN ONLY] Toggles a command on or off. Usage: {leader}{command} <option or command>")
+def toggle(bot, line):
+    if line.user.nick in line.conn.SERVER.ADMINS:
+        if line.text in bot.COMMANDS:
             #Toggling a command on or off
-            if handler.COMMANDS[message].toggle_enabled():
-                handler.privmsg(channel, "{} enabled!".format(message))
+            if bot.COMMANDS[line.text].toggle_enabled():
+                line.conn.privmsg(line.args[0], "{} enabled!".format(line.text))
             else:
-                handler.privmsg(channel, "{} disabled!".format(message))
+                line.conn.privmsg(line.args[0], "{} disabled!".format(line.text))
         else:
             #Toggling something else
-            if message == 'autoops':
-                if handler.SETTINGS.channels[channel].toggle_autoops():
-                    handler.privmsg(channel, "Auto-ops enabled for channel {}".format(channel))
+            if line.text == 'autoops':
+                if line.conn.SERVER.CHANNELS[line.args[0]].toggle_autoops():
+                    line.conn.privmsg(line.args[0], "Auto-ops enabled for channel {}".format(line.args[0]))
                 else:
-                    handler.privmsg(channel, "Auto-ops disabled for channel {}".format(channel))
-            elif message == 'autokick':
-                if handler.SETTINGS.channels[channel].toggle_autokick():
-                    handler.privmsg(channel, "Auto-kick enabled for channel {}".format(channel))
+                    line.conn.privmsg(line.args[0], "Auto-ops disabled for channel {}".format(line.args[0]))
+            elif line.text == 'autokick':
+                if line.conn.SERVER.CHANNELS[line.args[0]].toggle_autokick():
+                    line.conn.privmsg(line.args[0], "Auto-kick enabled for channel {}".format(line.args[0]))
                 else:
-                    handler.privmsg(channel, "Auto-kick disabled for channel {}".format(channel))
-            elif message == 'spamlimit':
-                if handler.SETTINGS.channels[channel].toggle_spamlimit():
-                    handler.privmsg(channel, "Spam-limit enabled for channel {}".format(channel))
+                    line.conn.privmsg(line.args[0], "Auto-kick disabled for channel {}".format(line.args[0]))
+            elif line.text == 'spamlimit':
+                if line.conn.SERVER.CHANNELS[line.args[0]].toggle_spamlimit():
+                    line.conn.privmsg(line.args[0], "Spam-limit enabled for channel {}".format(line.args[0]))
                 else:
-                    handler.privmsg(channel, "Spam-limit disabled for channel {}".format(channel))
-            elif message == 'autovoice':
-                if handler.SETTINGS.channels[channel].toggle_autovoice():
-                    handler.privmsg(channel, "Auto-voice enabled for channel {}".format(channel))
+                    line.conn.privmsg(line.args[0], "Spam-limit disabled for channel {}".format(line.args[0]))
+            elif line.text == 'autovoice':
+                if line.conn.SERVER.CHANNELS[line.args[0]].toggle_autovoice():
+                    line.conn.privmsg(line.args[0], "Auto-voice enabled for channel {}".format(line.args[0]))
                 else:
-                    handler.privmsg(channel, "Auto-voice disabled for channel {}".format(channel))
+                    line.conn.privmsg(line.args[0], "Auto-voice disabled for channel {}".format(line.args[0]))
