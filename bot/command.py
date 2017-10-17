@@ -56,3 +56,7 @@ def reload_commands():
         with open(source, 'r') as f:
             exec(compile(f.read(), source, "exec"))
     return commands
+
+def decorate_mans(leader, commands):
+    for key, command in commands.items():
+        commands[key].man = commands[key].man.format(leader=leader, command=key)

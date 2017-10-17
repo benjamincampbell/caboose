@@ -1,5 +1,5 @@
-@command("roulette", man = "Play Russian Roulette in channels where Caboose has ops. Usage: &roulette")
-def roulette(nick, channel, message, bot):
+@command("roulette", man = "Play Russian Roulette in channels where Caboose has ops. Usage: {leader}{command}")
+def roulette(bot, line):
     import random
 
     #chamber needs to persist through function calls without making a new one each time
@@ -19,16 +19,14 @@ def roulette(nick, channel, message, bot):
         if random.randint(1, 100) > 1:
             #reload
             chamber = ['click','click','click','click','click','bang']
-            bot.kick(channel, nick, result)
-            bot.privmsg(channel, 'reloading...')
+            line.conn.kick(line.args[0], line.user.nick, result)
+            line.conn.privmsg(line.args[0], 'reloading...')
         else:
             #misfire! 1/100 chance to not fire. lucked out!
             chamber = ['click','click','click','click','click','bang']
-            bot.privmsg(channel, '{}: misfire! reloading...'.format(nick))
-            bot.privmsg('twitch', '{} got a misfire! lucky!'.format(nick))
+            line.conn.privmsg(line.args[0], '{}: misfire! reloading...'.format(line.user.nick))
+            line.conn.privmsg('twitch', '{} got a misfire! lucky!'.format(line.user.nick))
     else:
         #remove one click
-        bot.privmsg(channel, '{}'.format(result))
+        line.conn.privmsg(line.args[0], '{}'.format(result))
         chamber.remove('click')
-        print("click removed")
-        print(chamber)

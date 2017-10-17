@@ -1,15 +1,13 @@
-@command("voice", man = "Gives voice to a user. Usage: &voice user")
-def voice(nick, channel, message, bot):
+@command("voice", man = "Gives voice to a user. Usage: {leader}{command} <users>")
+def voice(bot, line):
     voicestring = "+"
     
-    for user in message.split():
+    for user in line.text.split():
             voicestring += "v"
             
     voicestring += " "
-    for user in message.split():
+    for user in line.text.split():
             voicestring += "%s " % user
 
-    if (nick == bot.NICK) or (nick in bot.SETTINGS.globaladmins) :
-        bot.sendraw("MODE %s %s\r\n" % (channel, voicestring))
-    else:
-        bot.privmsg(channel, '{}: You don\'t have permission to do that'.format(nick))
+    if (line.user.nick == bot.NICK) or (line.user.nick in line.conn.SERVER.ADMINS) :
+        line.conn.sendraw("MODE %s %s\r\n" % (line.args[0], voicestring))

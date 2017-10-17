@@ -20,6 +20,8 @@ class Bot(object):
         self.CONNECTIONS = {}
         self.CFG = self.read_config()
         
+        bot.command.decorate_mans(self.LEADER, self.COMMANDS)
+        
     def read_config(self):
         with open('config.yaml', 'r') as f:
             cfg = yaml.load(f)
@@ -63,7 +65,8 @@ class Bot(object):
                             logging.info('{0}: {1} called {2} command with args: {3}'.format(line.conn.SERVER.HOST, line.user, line.command, line.text))
                             self.COMMANDS[line.command](self, line)
                     elif line.command == "reload":
-                        line.conn.COMMANDS = bot.command.reload_commands()
+                        self.COMMANDS = bot.command.reload_commands()
+                        bot.command.decorate_mans(self.LEADER, self.COMMANDS)
                     elif line.command == "source":
-                        conn.privmsg(channel, "http://github.com/benjamincampbell/caboose")
+                        line.conn.privmsg(channel, "http://github.com/benjamincampbell/caboose")
             line_queue.task_done()
