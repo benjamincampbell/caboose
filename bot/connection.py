@@ -43,6 +43,7 @@ class Connection(object):
             while True:
                 data = self.recv()
                 for l in data.splitlines():
+                    logging.info('{}'.format(l))
                     line = Line(self, l)
                     line.parse_line(leader)
                     line_queue.put(line)
@@ -102,7 +103,7 @@ class Connection(object):
         """
         Respond to PING from server
         """
-        self.sendraw("PONG %s" % response)
+        self.sendraw("PONG :%s" % response)
     
     def kick(self, channel, user, reason):
         """

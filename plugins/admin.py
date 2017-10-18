@@ -1,3 +1,5 @@
+from bot.command import command
+
 @command("admin", man = "[ADMIN ONLY] Adds people to admin list. Usage: {leader}{command} nick1 nick2")
 def admin(bot, line):
     import yaml
