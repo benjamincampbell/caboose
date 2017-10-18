@@ -64,9 +64,4 @@ class Bot(object):
                         if (self.COMMANDS[line.command].enabled):
                             logging.info('{0}: {1} called {2} command with args: {3}'.format(line.conn.SERVER.HOST, line.user, line.command, line.text))
                             self.COMMANDS[line.command](self, line)
-                    elif line.command == "reload":
-                        self.COMMANDS = bot.command.reload_commands()
-                        bot.command.decorate_mans(self.LEADER, self.COMMANDS)
-                    elif line.command == "source":
-                        line.conn.privmsg(channel, "http://github.com/benjamincampbell/caboose")
             line_queue.task_done()
