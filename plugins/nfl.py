@@ -74,7 +74,7 @@ def nfl(bot, line):
     score = get_scores('nfl', line.text)
     if score != {}:
         for key, value in score.items():
-            ret += "{t}: {s} | ".format(t=color(abbr[value[0].lower()].upper(), team_colors[value[0].lower()][0], team_colors[value[0].lower()][1]), s=value[1])
-            ret += "{t}: {s} ".format(t=color(abbr[value[2].lower()].upper(), team_colors[value[2].lower()][0], team_colors[value[2].lower()][1]), s=value[3])
+            ret += "{t}: {s} | ".format(t=color(abbr[value[0].lower()].upper(), *team_colors[value[0].lower()]), s=value[1])
+            ret += "{t}: {s} ".format(t=color(abbr[value[2].lower()].upper(), *team_colors[value[2].lower()]), s=value[3])
             ret += value[4]
         line.conn.privmsg(line.args[0], ret)
