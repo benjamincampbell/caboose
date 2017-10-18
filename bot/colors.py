@@ -20,7 +20,7 @@ colors = {
 def color(text, color, background=None):
     ret = ''
     if (background == None):
-        ret = '\003{c}{t}\003{c}'.format(t=text, c=colors[color])
+        ret = '\003{c}{t}\003'.format(t=text, c=colors[color])
     else:
-        ret = '\003{c},{b}{t}\003{c},{b}'.format(t=text, c=colors[color], b=colors[background])
+        ret = '\003{c},{b}{t}\003'.format(t=text, c=colors[color], b=colors[background])
     return ret
