@@ -59,56 +59,56 @@ class Connection(object):
         Send information to server
         """
         logging.info("{0} sendraw: {1}".format(self, string.encode()))
-        self.SOCK.send(string.encode())
+        self.SOCK.send('{}\r\n'.format(string).encode())
     
     def pwd(self):
         """
         Give password to server, if required
         """
-        self.sendraw("PASS %s\r\n" % self.SERVER.PASS)
+        self.sendraw("PASS %s" % self.SERVER.PASS)
     
     def nick(self, nick):
         """
         Specify bot's nick on the server
         """
-        self.sendraw("NICK %s\r\n" % nick)
+        self.sendraw("NICK %s" % nick)
     
     def user(self, nick, user):
         """
         Specify bot's user on the server
         """
-        self.sendraw("USER %s 0 * :%s\r\n" % (nick, user))
+        self.sendraw("USER %s 0 * :%s" % (nick, user))
     
     def privmsg(self, channel, message):
         """
         Send a PRIVMSG to server, used for most responses to commands
         """
-        msg = "PRIVMSG %s :%s\r\n" % (channel, message)
+        msg = "PRIVMSG %s :%s" % (channel, message)
         self.sendraw(msg)
     
     def join(self, chan):
         """
         Join IRC channel
         """
-        self.sendraw("JOIN %s\r\n" % chan)
+        self.sendraw("JOIN %s" % chan)
     
     def leave(self, chan):
         """
         Leave IRC Channel
         """
-        self.sendraw("PART %s\r\n" % chan)
+        self.sendraw("PART %s" % chan)
     
     def pong(self, response):
         """
         Respond to PING from server
         """
-        self.sendraw("PONG %s\r\n" % response)
+        self.sendraw("PONG %s" % response)
     
     def kick(self, channel, user, reason):
         """
         Kick user from channel with reason
         """
-        self.sendraw("KICK %s %s :%s\r\n" % (channel, user, reason))
+        self.sendraw("KICK %s %s :%s" % (channel, user, reason))
         
     def initialize(self, nickserv_email, nickserv_pass, nick):
         if self.SERVER.NICKSERV:
