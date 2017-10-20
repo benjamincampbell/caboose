@@ -68,8 +68,8 @@ abbr = {
     'washington': 'was',
 }
 
-@command("nfl", man="Gets information about an NFL team. Usage: {leader}{command} <team>")
-def nfl(bot, line):
+@command("nflbox", man="Gets the box score of the current/upcoming game for an NFL team. Usage: {leader}{command} <city>  *(except 'ny jets' and 'ny giants') ")
+def nflbox(bot, line):
     from plugins.espn_api import get_scores
     from bot.colors import color
     from plugins.nfl import abbr, team_colors
@@ -82,3 +82,12 @@ def nfl(bot, line):
             ret += "{t}: {s} ".format(t=color(abbr[value[2].lower()].upper(), *team_colors[value[2].lower()]), s=value[3])
             ret += value[4]
         line.conn.privmsg(line.args[0], ret)
+        
+@command("nflplayer" man="Get the stats of a given player name. Usage: {leader}{command} <firstname> <lastname>")
+nflplayer(bot, line):
+    import nflgame
+    
+    name = line.text
+    players = nflgame.find(name)
+    for p in players:
+    
