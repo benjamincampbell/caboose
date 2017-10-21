@@ -116,7 +116,6 @@ class Connection(object):
             self.nickserv_ident(nickserv_pass)
         for key, chan in self.SERVER.CHANNELS.items():
             self.join(chan)
-            self.privmsg(chan, '{0} up and running.'.format(nick))
         
     def nickserv_ident(self, pwd):
         """

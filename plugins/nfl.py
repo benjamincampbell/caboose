@@ -68,6 +68,54 @@ abbr = {
     'washington': 'was',
 }
 
+def passing_stats(pstats):
+    return "{}/{} for {} yds, {} TD, {} INT".format(pstats.passing_cmp,
+                                                      pstats.passing_att,
+                                                      pstats.passing_yds,
+                                                      pstats.passing_tds,
+                                                      pstats.passing_ints)
+
+def rushing_stats(pstats):
+    ret = "{} rushes for {} yds (long {}), {} TD ".format(pstats.rushing_att,
+                                                           pstats.rushing_yds,
+                                                           pstats.rushing_lng,
+                                                           pstats.rushing_tds)
+    if (pstats.rushing_att > 0):
+        ret += "({} avg)".format(pstats.rushing_yds / pstats.rushing_att)
+    else:
+        ret += "(0.0 avg)"
+    return ret
+
+def receiving_stats(pstats):
+    ret = "{} catches for {} yds (long {}), {} TD ".format(pstats.receiving_rec,
+                                                                    pstats.receiving_yds,
+                                                                    pstats.receiving_lng,
+                                                                    pstats.receiving_tds)
+    if (pstats.receiving_rec > 0):
+        ret += "({} avg)".format(pstats.receiving_yds / pstats.receiving_rec)
+    else:
+        ret += "(0.0 avg)"
+    return ret
+
+def det_stats(pstats):
+    pos = pstats.guess_position
+    s = ""
+    
+    if (pos == 'QB'):
+        s += passing_stats(pstats)
+        if (pstats.rushing_att > 0):
+            s += " | " + rushing_stats(pstats)
+    if (pos == 'RB'):
+        s += rushing_stats(pstats) + " | " + receiving_stats(pstats)
+    if (pos == 'WR'):
+        s += receiving_stats(pstats)
+        if (pstats.rushing_att > 0):
+            s += " | " + rushing_stats(pstats)
+    if (pos == 'TE'):
+        s += receiving_stats(pstats)
+        
+    return s
+
 @command("nflbox", man="Gets the box score of the current/upcoming game for an NFL team. Usage: {leader}{command} <city>  *(except 'ny jets' and 'ny giants') ")
 def nflbox(bot, line):
     from plugins.espn_api import get_scores
@@ -83,11 +131,31 @@ def nflbox(bot, line):
             ret += value[4]
         line.conn.privmsg(line.args[0], ret)
         
-@command("nflplayer" man="Get the stats of a given player name. Usage: {leader}{command} <firstname> <lastname>")
-nflplayer(bot, line):
+@command("nflplayer", man="Get the stats of a given player name. Usage: {leader}{command} [-year=<year>] [-week=<week>] <firstname> <lastname>")
+def nflplayer(bot, line):
     import nflgame
+    from datetime import date
+    from plugins.nfl import det_stats
     
-    name = line.text
+    nflgame.live._update_week_number()
+    year = nflgame.live._cur_year
+    week = nflgame.live._cur_week
+    full_season = False
+    
+    name = ' '.join(line.text.split(' ')[-2:])
     players = nflgame.find(name)
+
+    
     for p in players:
+        ret = ""
+        pstats = p.stats(nflgame.live._cur_year, nflgame.live._cur_week)
+        ret += str(p) + " - "
+        ret += det_stats(pstats)
+        line.conn.privmsg(line.args[0], ret)
+        
+    """
+    Aaron Rodgers (QB, GB) - 25/30 for 300 yds, 3 TD, 0 INT | 4 rushes for 40 yds (10.0 avg)
+    Ty Montgomery (RB, GB) - 14 rushes for 70 yds, 1 TD (5.0 avg) | 5 catches for 30 yds (6.0 avg)
+    """
+        
     
