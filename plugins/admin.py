@@ -15,7 +15,7 @@ def unadmin(bot, line):
             bot.CFG['servers'][line.conn.SERVER.NAME]['admins'].remove(line.text.strip())
             bot.update_config()
 
-@command("join", man = "[ADMIN ONLY] Makes Caboose join a channel. Usage: {leader}{command} #channel  (must type #)")
+@command("join", aliases = ["j"], man = "[ADMIN ONLY] Makes Caboose join a channel. Usage: {leader}{command} #channel  (must type #)")
 def join(bot, line):
     from bot.connection import Channel
     if line.user.nick in line.conn.SERVER.ADMINS:

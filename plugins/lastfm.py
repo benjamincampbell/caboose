@@ -10,7 +10,7 @@ def lastfm(bot, line):
     from bot.colors import color
 
     # testing
-    import pprint
+    # import pprint
 
     RECENT_TRACK_URL = "http://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user={0}&api_key={1}&format=json"
     TRACK_INFO_URL = "http://ws.audioscrobbler.com/2.0/?method=track.getInfo&api_key={0}&artist={1}&track={2}&username={3}&format=json"
@@ -38,8 +38,8 @@ def lastfm(bot, line):
             track_exists = False
 
         if track_exists:
-            pp = pprint.PrettyPrinter(indent=4)
-            pp.pprint(lastfm_track_info)
+            # pp = pprint.PrettyPrinter(indent=4)
+            # pp.pprint(lastfm_track_info)
 
             lastfm_track_song = lastfm_track_info["name"]
             lastfm_track_artist = lastfm_track_info["artist"]["#text"]
@@ -63,7 +63,7 @@ def lastfm(bot, line):
                 track_info_exists = False
                 lastfm_track_playcount = "N/A"
 
-            pp.pprint(info_json)
+            # pp.pprint(info_json)
 
             last_fm_track_tags = info_json["track"]["toptags"]["tag"]
             if (last_fm_track_tags == []):
