@@ -61,8 +61,9 @@ class Bot(object):
             elif line.type == 'PRIVMSG':
                 if line.command:
                     # invoke associated command or error
-                    if line.command in self.COMMANDS:
+                    if (line.command in self.COMMANDS):
                         if (self.COMMANDS[line.command].enabled):
                             logging.info('{0}: {1} called {2} command with args: {3}'.format(line.conn.SERVER.HOST, line.user, line.command, line.text))
                             self.COMMANDS[line.command](self, line)
+
             line_queue.task_done()

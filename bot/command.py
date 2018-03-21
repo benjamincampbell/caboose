@@ -42,6 +42,9 @@ def command(name, **options):
     def decorator(function):
         global commands
         commands[name] = cmd(function, options)
+        if "aliases" in options:
+            for a in options["aliases"]:
+                commands[a] = commands[name]
         return function
     return decorator
 
