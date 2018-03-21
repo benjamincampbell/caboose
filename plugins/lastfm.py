@@ -61,6 +61,7 @@ def lastfm(bot, line):
                 track_info_exists = True
             except KeyError:
                 track_info_exists = False
+                lastfm_track_playcount = "N/A"
 
             pp.pprint(info_json)
 
@@ -71,7 +72,7 @@ def lastfm(bot, line):
                 tags = ", ".join(t["name"] for t in last_fm_track_tags)
 
             if now_playing:
-                msg = "{0} is listening to {1} by {2} from the album {3} ({4}) [playcount: {4}]".format(color(last_fm_track_user, 'green'),
+                msg = "{0} is listening to {1} by {2} from the album {3} ({4}) [playcount: {5}]".format(color(last_fm_track_user, 'green'),
                     color(lastfm_track_song, 'lightblue'), color(lastfm_track_artist, 'lightblue'),
                     color(lastfm_track_album, 'lightblue'), tags, color(lastfm_track_playcount, 'green'))
             else:
