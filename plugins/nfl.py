@@ -136,23 +136,47 @@ def nflplayer(bot, line):
     import nflgame
     from datetime import date
     from plugins.nfl import det_stats
+    import collections
     
-    nflgame.live._update_week_number()
-    year = nflgame.live._cur_year
-    week = nflgame.live._cur_week
-    full_season = False
+    nflgame.live._update_week_number()    
     
     name = ' '.join(line.text.split(' ')[-2:])
     players = nflgame.find(name)
-
+    year = False
+    week = False
+    y = nflgame.live._cur_year
+    w = nflgame.live._cur_week
+    
+    parts = collections.deque(line.text.split(' '))
+    for p in parts:
+        if p.startswith('-year'):
+            year = True
+            y = p.split('=')[1]
+        if p.startswith('-week'):
+            week = True
+            w = p.split('=')[1]
+            
     
     for p in players:
         ret = ""
-        pstats = p.stats(nflgame.live._cur_year, nflgame.live._cur_week)
-        ret += str(p) + " - "
-        ret += det_stats(pstats)
-        line.conn.privmsg(line.args[0], ret)
         
+        print(p.name)
+        print(year)
+        print(y)
+        print(week)
+        print(w)
+        try:
+            if year and not week:
+                pstats = p.stats(y)
+            else:
+                pstats = p.stats(y, w)
+            ret += str(p) + " - "
+            ret += det_stats(pstats)
+            line.conn.privmsg(line.args[0], ret)
+        except TypeError:
+            line.conn.privmsg(line.args[0],
+                              "Could not find games for player {}".format(' '.join(line.text.split(' ')[-2:])))
+
     """
     Aaron Rodgers (QB, GB) - 25/30 for 300 yds, 3 TD, 0 INT | 4 rushes for 40 yds (10.0 avg)
     Ty Montgomery (RB, GB) - 14 rushes for 70 yds, 1 TD (5.0 avg) | 5 catches for 30 yds (6.0 avg)
