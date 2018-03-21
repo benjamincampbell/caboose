@@ -2,7 +2,7 @@ from bot.command import command
 
 
 
-@command("lastfm", man = "Obtain most recent played song for a Last.FM user Usage: {leader}{command} <username>")
+@command("lastfm", aliases = ["lfm", "np"], man = "Obtain most recent played song for a Last.FM user Usage: {leader}{command} <username>")
 def lastfm(bot, line):
     import json
     import requests
@@ -67,16 +67,16 @@ def lastfm(bot, line):
 
             last_fm_track_tags = info_json["track"]["toptags"]["tag"]
             if (last_fm_track_tags == []):
-                tags = "No tags"
+                tags = ""
             else:
-                tags = ", ".join(t["name"] for t in last_fm_track_tags)
+                tags = "({0}) ".format(", ".join(t["name"] for t in last_fm_track_tags))
 
             if now_playing:
-                msg = "{0} is listening to {1} by {2} from the album {3} ({4}) [playcount: {5}]".format(color(last_fm_track_user, 'green'),
+                msg = "{0} is listening to {1} by {2} from the album {3} {4}[playcount: {5}]".format(color(last_fm_track_user, 'green'),
                     color(lastfm_track_song, 'lightblue'), color(lastfm_track_artist, 'lightblue'),
                     color(lastfm_track_album, 'lightblue'), tags, color(lastfm_track_playcount, 'green'))
             else:
-                msg = "{0}'s last track: {1} by {2} from the album {3} ({4}) ({5}) [playcount: {6}]".format(color(last_fm_track_user, 'green'),
+                msg = "{0}'s last track: {1} by {2} from the album {3} {4}({5}) [playcount: {6}]".format(color(last_fm_track_user, 'green'),
                     color(lastfm_track_song, 'lightblue'), color(lastfm_track_artist, 'lightblue'),
                     color(lastfm_track_album, 'lightblue'), tags, lastfm_track_time, color(lastfm_track_playcount, 'green'))
 
