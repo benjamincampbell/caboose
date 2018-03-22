@@ -100,7 +100,7 @@ def receiving_stats(pstats):
 def det_stats(pstats):
     pos = pstats.guess_position
     s = ""
-    
+
     if (pos == 'QB'):
         s += passing_stats(pstats)
         if (pstats.rushing_att > 0):
@@ -113,7 +113,7 @@ def det_stats(pstats):
             s += " | " + rushing_stats(pstats)
     if (pos == 'TE'):
         s += receiving_stats(pstats)
-        
+
     return s
 
 @command("nflbox", man="Gets the box score of the current/upcoming game for an NFL team. Usage: {leader}{command} <city>  *(except 'ny jets' and 'ny giants') ")
@@ -121,7 +121,7 @@ def nflbox(bot, line):
     from plugins.espn_api import get_scores
     from bot.colors import color
     from plugins.nfl import abbr, team_colors
-        
+
     ret = ""
     score = get_scores('nfl', line.text)
     if score != {}:
@@ -130,23 +130,23 @@ def nflbox(bot, line):
             ret += "{t}: {s} ".format(t=color(abbr[value[2].lower()].upper(), *team_colors[value[2].lower()]), s=value[3])
             ret += value[4]
         line.conn.privmsg(line.args[0], ret)
-        
+
 @command("nflplayer", man="Get the stats of a given player name. Usage: {leader}{command} [-year=<year>] [-week=<week>] <firstname> <lastname>")
 def nflplayer(bot, line):
     import nflgame
     from datetime import date
     from plugins.nfl import det_stats
     import collections
-    
-    nflgame.live._update_week_number()    
-    
+
+    nflgame.live._update_week_number()
+
     name = ' '.join(line.text.split(' ')[-2:])
     players = nflgame.find(name)
     year = False
     week = False
     y = nflgame.live._cur_year
     w = nflgame.live._cur_week
-    
+
     parts = collections.deque(line.text.split(' '))
     for p in parts:
         if p.startswith('-year'):
@@ -155,11 +155,11 @@ def nflplayer(bot, line):
         if p.startswith('-week'):
             week = True
             w = p.split('=')[1]
-            
-    
+
+
     for p in players:
         ret = ""
-        
+
         print(p.name)
         print(year)
         print(y)
@@ -181,5 +181,3 @@ def nflplayer(bot, line):
     Aaron Rodgers (QB, GB) - 25/30 for 300 yds, 3 TD, 0 INT | 4 rushes for 40 yds (10.0 avg)
     Ty Montgomery (RB, GB) - 14 rushes for 70 yds, 1 TD (5.0 avg) | 5 catches for 30 yds (6.0 avg)
     """
-        
-    
