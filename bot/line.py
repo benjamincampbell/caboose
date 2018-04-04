@@ -41,10 +41,13 @@ class Line:
             if not message:
                 if p[0] == ':':
                     message = True
-                    if p[1] == leader:
-                        self.command = p.strip()[2:]
-                    else:
-                        txt.append(p.strip()[1:])
+                    try:
+                        if p[1] == leader:
+                            self.command = p.strip()[2:]
+                        else:
+                            txt.append(p.strip()[1:])
+                    except IndexError:
+                        pass
                 else:
                     self.args.append(p.strip())
             else:
