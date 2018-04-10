@@ -1,4 +1,3 @@
-import bot.command
 import logging
 import yaml
 import time
@@ -6,9 +5,12 @@ import threading
 import queue
 import os
 
+import bot.command
 from .command import reload_commands
 from .connection import Connection
 from .line import Line
+
+from googleapiclient.discovery import build
 
 class Bot(object):
     def __init__(self):
@@ -17,8 +19,11 @@ class Bot(object):
         self.NICKSERV_EMAIL = ''
         self.NICKSERV_PASS = ''
         self.COMMANDS = reload_commands()
+        self.SECRETS = []
         self.CONNECTIONS = {}
         self.CFG = self.read_config()
+
+        self.setup_google()
 
         bot.command.decorate_mans(self.LEADER, self.COMMANDS)
 
@@ -29,7 +34,7 @@ class Bot(object):
             self.LEADER = cfg['settings']['leader']
             self.NICKSERV_EMAIL = cfg['settings']['email']
             self.NICKSERV_PASS = cfg['settings']['pwd']
-            self.API_KEYS = cfg['settings']['api_keys']
+            self.SECRETS = cfg['settings']['secrets']
             self.create_connections(cfg)
 
         return cfg
@@ -42,6 +47,12 @@ class Bot(object):
     def create_connections(self, cfg):
         for name, settings in cfg['servers'].items():
             self.CONNECTIONS[name] = Connection(name, settings)
+
+    def setup_google(self):
+        self.google_search_service = build("customsearch", "v1",
+            developerKey=self.SECRETS["api_keys"]["google"])
+        self.google_urlshortener_service = build("urlshortener", "v1",
+            developerKey=self.SECRETS["api_keys"]["google"])
 
     def run(self):
         line_queue = queue.Queue()

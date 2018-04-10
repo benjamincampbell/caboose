@@ -1,7 +1,5 @@
 from bot.command import command
 
-
-
 @command("lastfm", aliases = ["lfm", "np"], man = "Obtain most recent played song for a Last.FM user Usage: {leader}{command} <username>")
 def lastfm(bot, line):
     import json
@@ -14,12 +12,13 @@ def lastfm(bot, line):
 
     RECENT_TRACK_URL = "http://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user={0}&api_key={1}&format=json"
     TRACK_INFO_URL = "http://ws.audioscrobbler.com/2.0/?method=track.getInfo&api_key={0}&artist={1}&track={2}&username={3}&format=json"
+    API_KEY = bot.SECRETS["api_keys"]["lastfm"]
 
     parts = line.text.split(' ')
 
     username = parts[0]
 
-    recent_response = requests.get(RECENT_TRACK_URL.format(username, bot.API_KEYS["lastfm"]))
+    recent_response = requests.get(RECENT_TRACK_URL.format(username, API_KEY))
     recent_json = json.loads(recent_response.text)
 
     try:
@@ -52,7 +51,7 @@ def lastfm(bot, line):
                 lastfm_track_time = lastfm_track_info["date"]["#text"]
                 now_playing = False
 
-            info_response = requests.get(TRACK_INFO_URL.format(bot.API_KEYS["lastfm"], lastfm_track_artist,
+            info_response = requests.get(TRACK_INFO_URL.format(API_KEY, lastfm_track_artist,
                 lastfm_track_song, last_fm_track_user))
             info_json = json.loads(info_response.text)
 
@@ -65,7 +64,7 @@ def lastfm(bot, line):
             except KeyError:
                 track_info_exists = False
                 lastfm_track_playcount = "N/A"
-                
+
             pp.pprint(info_json)
 
             if (last_fm_track_tags == []):
