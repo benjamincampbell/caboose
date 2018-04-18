@@ -15,7 +15,10 @@ def define(bot, line):
 
             for k, v in word.items():
                 i = random.randint(0, len(v)-1)
-                response += " ({0}): {1}".format(color(k, 'lightblue'), v[i])
+                d = v[i]
+                if d[0] == '(':
+                    d = d[1:]
+                response += " ({0}): {1}".format(color(k, 'lightblue'), d)
 
                 if k != list(word.keys())[-1]:
                     response += " |"
