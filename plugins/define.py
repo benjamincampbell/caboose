@@ -14,8 +14,7 @@ def define(bot, line):
             response = line.text.strip()
 
             for k, v in word.items():
-                i = random.randint(0, len(v)-1)
-                d = v[i]
+                d = random.choice(v)
                 if d[0] == '(':
                     d = d[1:]
                 response += " ({0}): {1}".format(color(k, 'lightblue'), d)
