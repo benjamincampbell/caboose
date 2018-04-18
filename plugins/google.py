@@ -2,6 +2,8 @@ from bot.command import command
 
 @command("google", aliases = ["g"], man = "Perform a google search, returning the first result. Usage: {leader}{command} <query>")
 def google(bot, line):
+    from plugins.shorten import shorten_url
+
     query = line.text
     if query == "":
         line.conn.privmsg(line.args[0], "Please enter a search query")
@@ -19,13 +21,7 @@ def google(bot, line):
             title = res["title"]
             link = res["formattedUrl"]
 
-            shorturl_res = bot.google_urlshortener_service.url().insert(
-                body={
-                    'longUrl': link
-                }
-            ).execute()
-
-            short_url = shorturl_res["id"]
+            short_url = shorten_url(bot, link)
 
             text = "{0} - {1}".format(
                 short_url,
@@ -37,6 +33,7 @@ def google(bot, line):
 
 @command("image", aliases = ["gis"], man = "Perform a google image search, returning the first result. Usage: {leader}{command} <query>")
 def image(bot, line):
+    from plugins.shorten import shorten_url
 
     query = line.text
     if query == "":
@@ -54,13 +51,7 @@ def image(bot, line):
             res = search_res["items"][0]
             link = res["link"]
 
-            shorturl_res = bot.google_urlshortener_service.url().insert(
-                body={
-                    'longUrl': link
-                }
-            ).execute()
-
-            short_url = shorturl_res["id"]
+            short_url = shorten_url(bot, link)
 
             text = "{0}".format(
                 short_url,

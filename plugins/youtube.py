@@ -2,6 +2,7 @@
 
 @command("youtube", aliases = ["yt"], man = "Perform a YouTube search, returning the first result. Usage: {leader}{command} <query>")
 def youtube(bot, line):
+    from plugins.shorten import shorten_url
 
     def get_playtime(raw_playtime):
         playtime = raw_playtime[2:]
@@ -39,13 +40,7 @@ def youtube(bot, line):
         raw_playtime = res["pagemap"]["videoobject"][0]["duration"]
         playtime = get_playtime(raw_playtime)
 
-        shorturl_res = bot.google_urlshortener_service.url().insert(
-            body={
-                'longUrl': link
-            }
-        ).execute()
-
-        short_url = shorturl_res["id"]
+        short_url = shorten_url(bot, link)
 
         text = "{0} - {1} [{2}] [{3} views]".format(
             short_url,
