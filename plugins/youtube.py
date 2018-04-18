@@ -24,30 +24,30 @@ def youtube(bot, line):
     else:
         cse_id = bot.SECRETS["other"]["google_cse_id"]
 
-        # try:
-        search_res = bot.google_search_service.cse().list(
-            q=query,
-            cx=cse_id,
-            siteSearch="youtube.com",
-            num=1
-        ).execute()
+        try:
+            search_res = bot.google_search_service.cse().list(
+                q=query,
+                cx=cse_id,
+                siteSearch="youtube.com",
+                num=1
+            ).execute()
 
-        res = search_res["items"][0]
+            res = search_res["items"][0]
 
-        link = res["link"]
-        title = res["title"]
-        views = res["pagemap"]["videoobject"][0]["interactioncount"]
-        raw_playtime = res["pagemap"]["videoobject"][0]["duration"]
-        playtime = get_playtime(raw_playtime)
+            link = res["link"]
+            title = res["title"]
+            views = res["pagemap"]["videoobject"][0]["interactioncount"]
+            raw_playtime = res["pagemap"]["videoobject"][0]["duration"]
+            playtime = get_playtime(raw_playtime)
 
-        short_url = shorten_url(bot, link)
+            short_url = shorten_url(bot, link)
 
-        text = "{0} - {1} [{2}] [{3} views]".format(
-            short_url,
-            title,
-            playtime,
-            views)
+            text = "{0} - {1} [{2}] [{3} views]".format(
+                short_url,
+                title,
+                playtime,
+                views)
 
-        line.conn.privmsg(line.args[0], text)
-        # except:
-        #     line.conn.privmsg(line.args[0], "Error during search")
+            line.conn.privmsg(line.args[0], text)
+        except Exception as e:
+            line.conn.privmsg(line.args[0], "Error: {0}".format(e))
