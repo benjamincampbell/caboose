@@ -19,7 +19,7 @@ def google(bot, line):
 
             res = search_res["items"][0]
             title = res["title"]
-            link = res["formattedUrl"]
+            link = res["link"]
 
             short_url = shorten_url(bot, link)
 

@@ -50,4 +50,4 @@ def youtube(bot, line):
 
             line.conn.privmsg(line.args[0], text)
         except Exception as e:
-            line.conn.privmsg(line.args[0], "Error: {0}".format(e))
+            line.conn.privmsg(line.args[0], "No results found.".format(e))

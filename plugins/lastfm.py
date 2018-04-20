@@ -63,7 +63,7 @@ def lastfm(bot, line):
                 last_fm_track_tags = info_json["track"]["toptags"]["tag"]
             except KeyError:
                 track_info_exists = False
-                lastfm_track_playcount = "N/A"
+                lastfm_track_playcount = "0"
 
             pp.pprint(info_json)
 
