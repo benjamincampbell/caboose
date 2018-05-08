@@ -1,6 +1,6 @@
 from bot.command import command
 
-@command("lastfm", aliases = ["lfm", "np"], man = "Obtain most recent played song for a Last.FM user Usage: {leader}{command} <username>")
+@command("lastfm", aliases = ["nowplaying", "lfm", "np"], man = "Obtain most recent played song for a Last.FM user Usage: {leader}{command} <username>")
 def lastfm(bot, line):
     import json
     import requests
@@ -65,7 +65,7 @@ def lastfm(bot, line):
                 track_info_exists = False
                 lastfm_track_playcount = "0"
 
-            pp.pprint(info_json)
+            # pp.pprint(info_json)
 
             if (last_fm_track_tags == []):
                 tags = ""
