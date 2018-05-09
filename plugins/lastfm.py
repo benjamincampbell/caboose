@@ -1,9 +1,28 @@
 from bot.command import command
 
-@command("lastfm", aliases = ["nowplaying", "lfm", "np"], man = "Obtain most recent played song for a Last.FM user Usage: {leader}{command} <username>")
+def api_errors():
+    return {
+    "2" : "Invalid service - This service does not exist",
+    "3" : "Invalid Method - No method with that name in this package",
+    "4" : "Authentication Failed - You do not have permissions to access the service",
+    "5" : "Invalid format - This service doesn't exist in that format",
+    "6" : "Invalid parameters - Your request is missing a required parameter",
+    "7" : "Invalid resource specified",
+    "8" : "Operation failed - Something else went wrong",
+    "9" : "Invalid session key - Please re-authenticate",
+    "10" : "Invalid API key - You must be granted a valid key by last.fm",
+    "11" : "Service Offline - This service is temporarily offline. Try again later.",
+    "13" : "Invalid method signature supplied",
+    "16" : "There was a temporary error processing your request. Please try again",
+    "26" : "Suspended API key - Access for your account has been suspended, please contact Last.fm",
+    "29" : "Rate limit exceeded - Your IP has made too many requests in a short period",
+}
+
+@command("lastfm", aliases=["nowplaying", "lfm", "np"], man="Obtain most recent played song for a Last.FM user Usage: {leader}{command} <username>")
 def lastfm(bot, line):
     import json
     import requests
+    import logging
     from datetime import datetime
     from bot.colors import color
 
@@ -73,13 +92,21 @@ def lastfm(bot, line):
                 tags = "({0}) ".format(", ".join(t["name"] for t in last_fm_track_tags))
 
             if now_playing:
-                msg = "{0} is listening to {1} by {2} from the album {3} {4}[playcount: {5}]".format(color(last_fm_track_user, 'green'),
-                    color(lastfm_track_song, 'lightblue'), color(lastfm_track_artist, 'lightblue'),
-                    color(lastfm_track_album, 'lightblue'), tags, color(lastfm_track_playcount, 'green'))
+                msg = "{0} is listening to {1} by {2} from the album {3} {4}[playcount: {5}]".format(
+                    color(last_fm_track_user, 'green'),
+                    color(lastfm_track_song, 'lightblue'),
+                    color(lastfm_track_artist, 'lightblue'),
+                    color(lastfm_track_album, 'lightblue'),
+                    tags,
+                    color(lastfm_track_playcount, 'green'))
             else:
-                msg = "{0}'s last track: {1} by {2} from the album {3} {4}({5}) [playcount: {6}]".format(color(last_fm_track_user, 'green'),
-                    color(lastfm_track_song, 'lightblue'), color(lastfm_track_artist, 'lightblue'),
-                    color(lastfm_track_album, 'lightblue'), tags, lastfm_track_time, color(lastfm_track_playcount, 'green'))
+                msg = "{0}'s last track: {1} by {2} from the album {3} {4}({5}) [playcount: {6}]".format(
+                    color(last_fm_track_user, 'green'),
+                    color(lastfm_track_song, 'lightblue'),
+                    color(lastfm_track_artist, 'lightblue'),
+                    color(lastfm_track_album, 'lightblue'),
+                    tags, lastfm_track_time,
+                    color(lastfm_track_playcount, 'green'))
 
         else:
             # user exists, track does not
@@ -90,12 +117,13 @@ def lastfm(bot, line):
 
     line.conn.privmsg(line.args[0], msg)
 
-@command("similar", man = "Obtain artists similar to the given artist. Usage: {leader}{command} <artist>")
+@command("similar", man="Obtain artists similar to the given artist. Usage: {leader}{command} <artist>")
 def similar(bot, line):
     import json
     import requests
-    from datetime import datetime
+    import logging
     from bot.colors import color
+    from plugins.lastfm import api_errors
 
     SIMILAR_URL = "http://ws.audioscrobbler.com/2.0/?method=artist.getsimilar&artist={artist}&api_key={api_key}&format=json"
     API_KEY = bot.SECRETS["api_keys"]["lastfm"]
@@ -109,7 +137,7 @@ def similar(bot, line):
         similar_json = json.loads(similar_response.text)
 
         msg = ""
-        i = 0
+        artist_list = []
 
         if "similarartists" in similar_json:
             if "artist" in similar_json["similarartists"]:
@@ -119,15 +147,64 @@ def similar(bot, line):
                 else:
                     msg = "Artists similar to {0}:".format(color(similar_json["similarartists"]["@attr"]["artist"], 'green'))
                     for a in similar_json["similarartists"]["artist"]:
-                        if i < 8:
-                            msg += " {0},".format(color(a["name"], 'lightblue'))
-                            i += 1
+                        if len(artist_list) < 8:
+                            artist_list.append(a["name"])
+                    msg += ",".join(map(lambda x: color(" "+x, 'lightblue'), artist_list))
             else:
                 logging.warning("API Error: no ['artist'] key for {artist}".format(artist=artist))
         else:
             # Some sort of error in JSON
             if "error" in similar_json:
-                if similar_json["error"] == 6:
-                    msg = "Artist {0} not found.".format(color(artist, 'green'))
+                msg = "API Error, please have admin consult logs"
+                logging.warning(api_errors()[str(similar_json["error"])])
             logging.warning("API Error: no ['similarartists'] key for {artist}".format(artist=artist))
-        line.conn.privmsg(line.args[0], msg[:-1] if msg[-1]==',' else msg)
+        line.conn.privmsg(line.args[0], msg)
+
+@command(name="tags", aliases=["genre"], man="Get the top tags for a given artist. Usage: {leader}{command} <artist>")
+def tags(bot, line):
+    import json
+    import requests
+    import logging
+    from bot.colors import color
+    from plugins.lastfm import api_errors
+
+    TAGS_URL = "http://ws.audioscrobbler.com/2.0/?method=artist.gettoptags&artist={artist}&api_key={api_key}&format=json"
+    API_KEY = bot.SECRETS["api_keys"]["lastfm"]
+
+    msg = ""
+    artist = line.text
+
+    if artist.strip() == "":
+        line.conn.privmsg(line.args[0], "Please enter an artist.")
+    else:
+        tags_response = requests.get(TAGS_URL.format(artist=artist, api_key=API_KEY))
+        tags_json = json.loads(tags_response.text)
+
+        msg = ""
+        tag_list = []
+
+        if "toptags" in tags_json:
+            if "tag" in tags_json["toptags"]:
+                if tags_json["toptags"]["@attr"]["artist"] == "[unknown]":
+                    logging.warning("API Error: Unknown artist, but not Error code 6")
+                    msg = "Artist {0} not found.".format(color(artist, 'green'))
+                else:
+                    if not tags_json["toptags"]["tag"]:
+                        msg = "No tags found for artist {artist}".format(
+                            artist=color(artist, 'green')
+                        )
+                    else:
+                        msg = "Top tags for {0}:".format(color(tags_json["toptags"]["@attr"]["artist"], 'green'))
+                        for t in tags_json["toptags"]["tag"]:
+                            if len(tag_list) < 8:
+                                tag_list.append(t["name"])
+                        msg += ",".join(map(lambda x: color(" "+x, 'lightblue'), tag_list))
+            else:
+                logging.warning("API Error: no ['tag'] key for {artist}".format(artist=artist))
+        else:
+            # Some sort of error in JSON
+            if "error" in tags_json:
+                msg = "API Error, please have admin consult logs"
+                logging.warning(api_errors()[str(tags_json["error"])])
+            logging.warning("API Error: no ['toptags'] key for {artist}".format(artist=artist))
+        line.conn.privmsg(line.args[0], msg)
