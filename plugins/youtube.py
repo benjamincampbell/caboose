@@ -3,6 +3,7 @@
 @command("youtube", aliases = ["yt"], man = "Perform a YouTube search, returning the first result. Usage: {leader}{command} <query>")
 def youtube(bot, line):
     from plugins.shorten import shorten_url
+    import logging
 
     def get_playtime(raw_playtime):
         playtime = raw_playtime[2:]
@@ -46,8 +47,9 @@ def youtube(bot, line):
                 short_url,
                 title,
                 playtime,
-                views)
+                "{:,}".format(int(views)))
 
             line.conn.privmsg(line.args[0], text)
         except Exception as e:
+            logging.warning(e)
             line.conn.privmsg(line.args[0], "No results found.".format(e))
