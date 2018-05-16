@@ -1,22 +1,23 @@
 from bot.command import command
 
-def api_errors():
-    return {
-    "2" : "Invalid service - This service does not exist",
-    "3" : "Invalid Method - No method with that name in this package",
-    "4" : "Authentication Failed - You do not have permissions to access the service",
-    "5" : "Invalid format - This service doesn't exist in that format",
-    "6" : "Invalid parameters - Your request is missing a required parameter",
-    "7" : "Invalid resource specified",
-    "8" : "Operation failed - Something else went wrong",
-    "9" : "Invalid session key - Please re-authenticate",
-    "10" : "Invalid API key - You must be granted a valid key by last.fm",
-    "11" : "Service Offline - This service is temporarily offline. Try again later.",
-    "13" : "Invalid method signature supplied",
-    "16" : "There was a temporary error processing your request. Please try again",
-    "26" : "Suspended API key - Access for your account has been suspended, please contact Last.fm",
-    "29" : "Rate limit exceeded - Your IP has made too many requests in a short period",
-}
+def api_errors(e):
+    errors = {
+        "2" : "Invalid service - This service does not exist",
+        "3" : "Invalid Method - No method with that name in this package",
+        "4" : "Authentication Failed - You do not have permissions to access the service",
+        "5" : "Invalid format - This service doesn't exist in that format",
+        "6" : "Invalid parameters - Your request is missing a required parameter",
+        "7" : "Invalid resource specified",
+        "8" : "Operation failed - Something else went wrong",
+        "9" : "Invalid session key - Please re-authenticate",
+        "10" : "Invalid API key - You must be granted a valid key by last.fm",
+        "11" : "Service Offline - This service is temporarily offline. Try again later.",
+        "13" : "Invalid method signature supplied",
+        "16" : "There was a temporary error processing your request. Please try again",
+        "26" : "Suspended API key - Access for your account has been suspended, please contact Last.fm",
+        "29" : "Rate limit exceeded - Your IP has made too many requests in a short period",
+    }
+    return errors[e]
 
 @command("lastfm", aliases=["nowplaying", "lfm", "np"], man="Obtain most recent played song for a Last.FM user Usage: {leader}{command} <username>")
 def lastfm(bot, line):
@@ -156,7 +157,7 @@ def similar(bot, line):
             # Some sort of error in JSON
             if "error" in similar_json:
                 msg = "API Error, please have admin consult logs"
-                logging.warning(api_errors()[str(similar_json["error"])])
+                logging.warning(api_errors(str(similar_json["error"])))
             logging.warning("API Error: no ['similarartists'] key for {artist}".format(artist=artist))
         line.conn.privmsg(line.args[0], msg)
 
@@ -205,6 +206,6 @@ def tags(bot, line):
             # Some sort of error in JSON
             if "error" in tags_json:
                 msg = "API Error, please have admin consult logs"
-                logging.warning(api_errors()[str(tags_json["error"])])
+                logging.warning(api_errors(str(tags_json["error"])))
             logging.warning("API Error: no ['toptags'] key for {artist}".format(artist=artist))
         line.conn.privmsg(line.args[0], msg)
