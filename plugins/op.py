@@ -9,7 +9,7 @@ def op(bot, line):
 	for i in range(count):
             opstring += "o"
 	opstring += " "
-	for user in message.split():
+	for user in line.text.split():
             opstring += "%s " % user
 
 	if (line.user.nick == bot.NICK) or (line.user.nick in line.conn.SERVER.ADMINS):
