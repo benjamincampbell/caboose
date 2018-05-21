@@ -20,6 +20,7 @@ def api_errors(e):
     return errors[e]
 
 @command("lastfm", aliases=["nowplaying", "lfm", "np"], man="Obtain most recent played song for a Last.FM user Usage: {leader}{command} <username>")
+@db(nick="STRING UNIQUE", username="STRING")
 def lastfm(bot, line):
     import json
     import requests
@@ -35,88 +36,103 @@ def lastfm(bot, line):
     API_KEY = bot.SECRETS["api_keys"]["lastfm"]
 
     parts = line.text.split(' ')
+    
+    if parts[0] == "-set":
+        username = parts[1]
+        SQL = """
+            INSERT INTO lastfm
+            (nick, username)
+            VALUES
+            ("%s", "%s")
+        """ % (line.user.nick, username)
+        c = bot.DB_CONN.cursor()
+        c.execute(SQL)
+        bot.DB_CONN.commit()
+        c.close()
+        print(line.args[0], "Username {0} set for {1}".format(username, line.user.nick))
+    else:
 
-    username = parts[0]
+        username = parts[0]
 
-    recent_response = requests.get(RECENT_TRACK_URL.format(user=username, api_key=API_KEY))
-    recent_json = json.loads(recent_response.text)
-
-    try:
-        error = recent_json["error"]
-        user_exists = False
-    except KeyError:
-        user_exists = True
-
-    if user_exists:
-        last_fm_track_user = recent_json["recenttracks"]["@attr"]["user"]
+        recent_response = requests.get(RECENT_TRACK_URL.format(user=username, api_key=API_KEY))
+        recent_json = json.loads(recent_response.text)
 
         try:
-            lastfm_track_info = recent_json["recenttracks"]["track"][0]
-            track_exists = True
-        except IndexError:
-            track_exists = False
+            error = recent_json["error"]
+            user_exists = False
+        except KeyError:
+            user_exists = True
 
-        if track_exists:
-            pp = pprint.PrettyPrinter(indent=4)
-            pp.pprint(lastfm_track_info)
-
-            lastfm_track_song = lastfm_track_info["name"]
-            lastfm_track_artist = lastfm_track_info["artist"]["#text"]
-            lastfm_track_album = lastfm_track_info["album"]["#text"]
+        if user_exists:
+            last_fm_track_user = recent_json["recenttracks"]["@attr"]["user"]
 
             try:
-                lastfm_track_time = lastfm_track_info["@attr"]["nowplaying"]
-                now_playing = True
-            except KeyError:
-                lastfm_track_time = lastfm_track_info["date"]["#text"]
-                now_playing = False
+                lastfm_track_info = recent_json["recenttracks"]["track"][0]
+                track_exists = True
+            except IndexError:
+                track_exists = False
 
-            info_response = requests.get(TRACK_INFO_URL.format(api_key=API_KEY, artist=lastfm_track_artist,
-                track=lastfm_track_song, user=last_fm_track_user))
-            info_json = json.loads(info_response.text)
+            if track_exists:
+                pp = pprint.PrettyPrinter(indent=4)
+                pp.pprint(lastfm_track_info)
 
-            last_fm_track_tags = []
+                lastfm_track_song = lastfm_track_info["name"]
+                lastfm_track_artist = lastfm_track_info["artist"]["#text"]
+                lastfm_track_album = lastfm_track_info["album"]["#text"]
 
-            try:
-                lastfm_track_playcount = info_json["track"]["userplaycount"]
-                track_info_exists = True
-                last_fm_track_tags = info_json["track"]["toptags"]["tag"]
-            except KeyError:
-                track_info_exists = False
-                lastfm_track_playcount = "0"
+                try:
+                    lastfm_track_time = lastfm_track_info["@attr"]["nowplaying"]
+                    now_playing = True
+                except KeyError:
+                    lastfm_track_time = lastfm_track_info["date"]["#text"]
+                    now_playing = False
 
-            # pp.pprint(info_json)
+                info_response = requests.get(TRACK_INFO_URL.format(api_key=API_KEY, artist=lastfm_track_artist,
+                    track=lastfm_track_song, user=last_fm_track_user))
+                info_json = json.loads(info_response.text)
 
-            if (last_fm_track_tags == []):
-                tags = ""
+                last_fm_track_tags = []
+
+                try:
+                    lastfm_track_playcount = info_json["track"]["userplaycount"]
+                    track_info_exists = True
+                    last_fm_track_tags = info_json["track"]["toptags"]["tag"]
+                except KeyError:
+                    track_info_exists = False
+                    lastfm_track_playcount = "0"
+
+                # pp.pprint(info_json)
+
+                if (last_fm_track_tags == []):
+                    tags = ""
+                else:
+                    tags = "({0}) ".format(", ".join(t["name"] for t in last_fm_track_tags))
+
+                if now_playing:
+                    msg = "{0} is listening to {1} by {2} from the album {3} {4}[playcount: {5}]".format(
+                        color(last_fm_track_user, 'green'),
+                        color(lastfm_track_song, 'lightblue'),
+                        color(lastfm_track_artist, 'lightblue'),
+                        color(lastfm_track_album, 'lightblue'),
+                        tags,
+                        color(lastfm_track_playcount, 'green'))
+                else:
+                    msg = "{0}'s last track: {1} by {2} from the album {3} {4}({5}) [playcount: {6}]".format(
+                        color(last_fm_track_user, 'green'),
+                        color(lastfm_track_song, 'lightblue'),
+                        color(lastfm_track_artist, 'lightblue'),
+                        color(lastfm_track_album, 'lightblue'),
+                        tags, lastfm_track_time,
+                        color(lastfm_track_playcount, 'green'))
+
             else:
-                tags = "({0}) ".format(", ".join(t["name"] for t in last_fm_track_tags))
-
-            if now_playing:
-                msg = "{0} is listening to {1} by {2} from the album {3} {4}[playcount: {5}]".format(
-                    color(last_fm_track_user, 'green'),
-                    color(lastfm_track_song, 'lightblue'),
-                    color(lastfm_track_artist, 'lightblue'),
-                    color(lastfm_track_album, 'lightblue'),
-                    tags,
-                    color(lastfm_track_playcount, 'green'))
-            else:
-                msg = "{0}'s last track: {1} by {2} from the album {3} {4}({5}) [playcount: {6}]".format(
-                    color(last_fm_track_user, 'green'),
-                    color(lastfm_track_song, 'lightblue'),
-                    color(lastfm_track_artist, 'lightblue'),
-                    color(lastfm_track_album, 'lightblue'),
-                    tags, lastfm_track_time,
-                    color(lastfm_track_playcount, 'green'))
-
+                # user exists, track does not
+                msg = "{0} has never listened to anything.".format(color(last_fm_track_user, 'green'))
         else:
-            # user exists, track does not
-            msg = "{0} has never listened to anything.".format(color(last_fm_track_user, 'green'))
-    else:
-        # user does not exist
-        msg = "User {0} does not exist.".format(color(username, 'green'))
+            # user does not exist
+            msg = "User {0} does not exist.".format(color(username, 'green'))
 
-    line.conn.privmsg(line.args[0], msg)
+        line.conn.privmsg(line.args[0], msg)
 
 @command("similar", man="Obtain artists similar to the given artist. Usage: {leader}{command} <artist>")
 def similar(bot, line):
