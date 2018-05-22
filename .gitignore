@@ -41,5 +41,6 @@ Thumbs.db
 ####################
 reminders.txt
 ignore.txt
+caboose.db
 config.yaml
 __pycache__/
