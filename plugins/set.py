@@ -1,25 +1,14 @@
 from bot.command import command, db
 
 @command("setdata", man="sets arbitrary data for a user")
-@db(nick="TEXT", value="TEXT")
+@db(nick="TEXT UNIQUE", value="TEXT")
 def setdata(bot, line):
+    from bot.db import insert, clean_string
 
     nick = line.user.nick
-    value = line.text.replace("\'", "''")
+    value = clean_string(line.text)
 
-    sql = """
-        INSERT INTO setdata
-        (nick, value)
-        VALUES
-        ('%s', '%s')
-    """ % (nick, value)
-
-    print(sql)
-
-    c = bot.DB_CONN.cursor()
-    result = c.execute(sql)
-    bot.DB_CONN.commit()
-    c.close()
+    insert(bot, "setdata", nick=nick, value=value)
 
     line.conn.privmsg(line.args[0], "value {val} set for nick {nick}".format(val=value,
                                                                              nick=nick))
@@ -27,16 +16,16 @@ def setdata(bot, line):
 @command("getdata", man="gets data of user")
 def getdata(bot, line):
     import random
-    from bot.db import get_equal
-
-    sql = """
-          SELECT * FROM setdata
-          """
+    from bot.db import get_equal, clean_string
 
     nick = line.text
     results = get_equal(bot, "setdata", nick=nick)
-
-    result = random.choice(results)
+    if len(results) > 0:
+        result = random.choice(results)
+    else:
+        result = {
+            "nick": line.text,
+            "value": "No value existed"}
 
     print(result)
 

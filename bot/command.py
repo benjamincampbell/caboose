@@ -72,5 +72,7 @@ def reload_commands():
     return commands, tables
 
 def decorate_mans(leader, commands):
+    print("in decorate_mans, commands: ")
+    print(commands)
     for key, command in commands.items():
         commands[key].man = commands[key].man.format(leader=leader, command=key)

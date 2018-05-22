@@ -19,7 +19,9 @@ def api_errors(e):
     }
     return errors[e]
 
-@command("lastfm", aliases=["nowplaying", "lfm", "np"], man="Obtain most recent played song for a Last.FM user Usage: {leader}{command} <username>")
+@command("lastfm", aliases=["nowplaying", "lfm", "np"], man="Obtains most recent played song for a given Last.fm user. "
+        "-default to set default user for your nick, to use if no username given."
+        "Usage: {leader}{command} [-default] <username>")
 @db(nick="STRING UNIQUE", username="STRING")
 def lastfm(bot, line):
     import json
@@ -27,32 +29,47 @@ def lastfm(bot, line):
     import logging
     from datetime import datetime
     from bot.colors import color
+    from bot.db import insert, get_equal, clean_string
 
     # testing
-    import pprint
+    # import pprint
 
     RECENT_TRACK_URL = "http://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user={user}&api_key={api_key}&format=json"
     TRACK_INFO_URL = "http://ws.audioscrobbler.com/2.0/?method=track.getInfo&api_key={api_key}&artist={artist}&track={track}&username={user}&format=json"
     API_KEY = bot.SECRETS["api_keys"]["lastfm"]
 
     parts = line.text.split(' ')
-    
-    if parts[0] == "-set":
-        username = parts[1]
-        SQL = """
-            INSERT INTO lastfm
-            (nick, username)
-            VALUES
-            ("%s", "%s")
-        """ % (line.user.nick, username)
-        c = bot.DB_CONN.cursor()
-        c.execute(SQL)
-        bot.DB_CONN.commit()
-        c.close()
-        print(line.args[0], "Username {0} set for {1}".format(username, line.user.nick))
-    else:
 
-        username = parts[0]
+    if parts[0] == "-default":
+        if len(parts[1:]) == 0:
+            line.conn.privmsg(line.args[0], "Please enter a one-word username.")
+            return None
+        username = parts[1]
+        if len(parts[1:]) > 1:
+            # there should only be one more part: the username
+            line.conn.privmsg(line.args[0], "Please enter a one-word username.")
+            return None
+        if clean_string(username) != "":
+            insert(bot, "lastfm", nick=line.user.nick, username=username)
+            line.conn.privmsg(line.args[0], "Default username {0} set for {1}".format(color(username, 'green'), line.user.nick))
+        else:
+            line.conn.privmsg(line.args[0], "Please enter an alphanumeric username.")
+
+    else:
+        if parts[0] != "":
+            if len(parts) > 1:
+                line.conn.privmsg(line.args[0], "Please enter a one-word username.")
+                return None
+            username = parts[0]
+        else:
+            # no username given, try to use default
+            try:
+                result = get_equal(bot, "lastfm", nick=line.user.nick)[0]
+                username = result["username"]
+            except IndexError:
+                # no row found, username not in table
+                line.conn.privmsg(line.args[0], "No username given, nor a default for {nick} found.".format(nick=line.user.nick))
+                return None
 
         recent_response = requests.get(RECENT_TRACK_URL.format(user=username, api_key=API_KEY))
         recent_json = json.loads(recent_response.text)
@@ -73,8 +90,8 @@ def lastfm(bot, line):
                 track_exists = False
 
             if track_exists:
-                pp = pprint.PrettyPrinter(indent=4)
-                pp.pprint(lastfm_track_info)
+                # pp = pprint.PrettyPrinter(indent=4)
+                # pp.pprint(lastfm_track_info)
 
                 lastfm_track_song = lastfm_track_info["name"]
                 lastfm_track_artist = lastfm_track_info["artist"]["#text"]

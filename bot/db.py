@@ -1,4 +1,5 @@
 import sqlite3
+import re
 
 def get_db():
     conn = sqlite3.connect("caboose.db")
@@ -23,22 +24,30 @@ def create_tables(bot, tables):
     c.close()
 
 def insert(bot, table_name, **values):
-    """
-    TODO: this
-    set(Bot, "setdata", nick="twitch", value="some value")
-    ->
-    INSERT INTO setdata
-    (nick, value)
-    VALUES
-    ("twitch", "some value")
-    """
+    # c = bot.DB_CONN.cursor()
+    values = {k: clean_string(v) for k, v in values.items()}
+    sql = "INSERT OR REPLACE INTO %s (" % table_name
+    cols = []
+    for c in values:
+        cols.append(c)
+    sql += ",".join(cols)
+    sql += ") VALUES ("
+    vals = []
+    for key, value in values.items():
+        vals.append(value)
+    sql += ",".join("?" * len(vals))
+    sql += ")"
+    print(sql)
+    c = bot.DB_CONN.cursor()
+    c.execute(sql, vals)
+    bot.DB_CONN.commit()
+    c.close()
 
-def insert_or_replace(bot, table_name, **values):
-    """
-    TODO: make this
-    """
+def clean_string(s):
+    return re.sub('[^a-zA-Z0-9]', '', s)
 
 def get_equal(bot, table_name, **conditions):
+    values = {k: clean_string(v) for k, v in conditions.items()}
     sql = ("SELECT * "
            "FROM %s " % table_name)
 
