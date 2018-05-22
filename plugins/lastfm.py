@@ -1,4 +1,12 @@
-from bot.command import command
+import requests
+import logging
+import json
+from datetime import datetime
+
+from bot.colors import color
+from bot.command import command, db
+
+# TODO: Add year to album of song; The Colour and the Shape (1997)
 
 def api_errors(e):
     errors = {
@@ -19,27 +27,71 @@ def api_errors(e):
     }
     return errors[e]
 
-@command("lastfm", aliases=["nowplaying", "lfm", "np"], man="Obtain most recent played song for a Last.FM user Usage: {leader}{command} <username>")
+@command("lastfm", aliases=["nowplaying", "lfm", "np"], man="Obtains most recently played song for a given Last.fm user. "
+        "-default to set default user for your nick, to use if no username given. "
+        "Usage: {leader}{command} [-default] <username>")
+@db(nick="STRING UNIQUE", username="STRING")
 def lastfm(bot, line):
-    import json
-    import requests
-    import logging
-    from datetime import datetime
-    from bot.colors import color
+    from bot.db import insert, get_equal
+    from plugins.lastfm import get_last_played_track
 
     # testing
-    import pprint
+    # import pprint
 
-    RECENT_TRACK_URL = "http://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user={user}&api_key={api_key}&format=json"
-    TRACK_INFO_URL = "http://ws.audioscrobbler.com/2.0/?method=track.getInfo&api_key={api_key}&artist={artist}&track={track}&username={user}&format=json"
     API_KEY = bot.SECRETS["api_keys"]["lastfm"]
 
     parts = line.text.split(' ')
 
-    username = parts[0]
+    if parts[0] == "-default":
+        # set default username for the nick calling the function
+        if len(parts[1:]) != 1:
+            # make sure they're actually providing an argument
+            line.conn.privmsg(line.args[0], "Please enter a one-word username.")
+            return None
 
-    recent_response = requests.get(RECENT_TRACK_URL.format(user=username, api_key=API_KEY))
-    recent_json = json.loads(recent_response.text)
+        username = parts[1]
+
+        if username == "":
+            line.conn.privmsg(line.args[0], "Please enter an alphanumeric username.")
+            return None
+        else:
+            # insert the username into the table
+            insert(bot, "lastfm", nick=line.user.nick, username=username)
+            line.conn.privmsg(line.args[0], "Default username {0} set for {1}".format(color(username, 'green'), line.user.nick))
+    else:
+        # look up given nickname, or default for user if there is no given username.
+        if parts[0] != "":
+            # Some argument was given after !lastfm
+            if len(parts) > 1:
+                # Usernames are 1 word, not >=2
+                line.conn.privmsg(line.args[0], "Please enter a one-word username.")
+                return None
+            username = parts[0]
+        else:
+            # no username given, try to use default
+            try:
+                result = get_equal(bot, "lastfm", nick=line.user.nick)[0]
+                username = result["username"]
+            except IndexError:
+                # no row found, username not in table
+                line.conn.privmsg(line.args[0], "No username given, nor a default for {nick} found.".format(nick=line.user.nick))
+                return None
+
+        msg = get_last_played_track(username, API_KEY)
+
+        line.conn.privmsg(line.args[0], msg)
+
+def get_last_played_track(username, api_key):
+    RECENT_TRACK_URL = "http://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user={user}&api_key={api_key}&format=json"
+    TRACK_INFO_URL = "http://ws.audioscrobbler.com/2.0/?method=track.getInfo&api_key={api_key}&artist={artist}&track={track}&username={user}&format=json"
+
+    recent_response = requests.get(RECENT_TRACK_URL.format(user=username, api_key=api_key))
+
+    try:
+        recent_json = json.loads(recent_response.text)
+    except ValueError:
+        line.conn.privmsg(line.args[0], "Error parsing JSON response")
+        return None
 
     try:
         error = recent_json["error"]
@@ -57,8 +109,8 @@ def lastfm(bot, line):
             track_exists = False
 
         if track_exists:
-            pp = pprint.PrettyPrinter(indent=4)
-            pp.pprint(lastfm_track_info)
+            # pp = pprint.PrettyPrinter(indent=4)
+            # pp.pprint(lastfm_track_info)
 
             lastfm_track_song = lastfm_track_info["name"]
             lastfm_track_artist = lastfm_track_info["artist"]["#text"]
@@ -71,21 +123,21 @@ def lastfm(bot, line):
                 lastfm_track_time = lastfm_track_info["date"]["#text"]
                 now_playing = False
 
-            info_response = requests.get(TRACK_INFO_URL.format(api_key=API_KEY, artist=lastfm_track_artist,
+            track_info_response = requests.get(TRACK_INFO_URL.format(api_key=api_key, artist=lastfm_track_artist,
                 track=lastfm_track_song, user=last_fm_track_user))
-            info_json = json.loads(info_response.text)
+            track_info_json = json.loads(track_info_response.text)
 
             last_fm_track_tags = []
 
             try:
-                lastfm_track_playcount = info_json["track"]["userplaycount"]
+                lastfm_track_playcount = track_info_json["track"]["userplaycount"]
                 track_info_exists = True
-                last_fm_track_tags = info_json["track"]["toptags"]["tag"]
+                last_fm_track_tags = track_info_json["track"]["toptags"]["tag"]
             except KeyError:
                 track_info_exists = False
                 lastfm_track_playcount = "0"
 
-            # pp.pprint(info_json)
+            # pp.pprint(track_info_json)
 
             if (last_fm_track_tags == []):
                 tags = ""
@@ -115,8 +167,7 @@ def lastfm(bot, line):
     else:
         # user does not exist
         msg = "User {0} does not exist.".format(color(username, 'green'))
-
-    line.conn.privmsg(line.args[0], msg)
+    return msg
 
 @command("similar", man="Obtain artists similar to the given artist. Usage: {leader}{command} <artist>")
 def similar(bot, line):
@@ -209,3 +260,22 @@ def tags(bot, line):
                 logging.warning(api_errors(str(tags_json["error"])))
             logging.warning("API Error: no ['toptags'] key for {artist}".format(artist=artist))
         line.conn.privmsg(line.args[0], msg)
+
+@command("musiccreep", aliases=["creep", "mc"], man="Obtain the last-played song of a random user who has a default "
+        "Last.fm username set via !lastfm. Usage: {leader}{command}")
+def musiccreep(bot, line):
+    import random
+
+    from bot.db import get_equal
+    from plugins.lastfm import get_last_played_track
+
+    results = get_equal(bot, "lastfm")
+    print(results)
+    choice = random.choice(results)
+
+    username = choice["username"]
+    API_KEY = bot.SECRETS["api_keys"]["lastfm"]
+
+    msg = get_last_played_track(username, API_KEY)
+
+    line.conn.privmsg(line.args[0], msg)

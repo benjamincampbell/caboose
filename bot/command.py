@@ -13,7 +13,7 @@ class cmd(object):
     def __call__(self, *argv):
         #python magic so calling the cmd object instance returns the function itself
         return self.func(*argv)
-    
+
     def __getattr__(self, name):
         return self.opts[name]
 
@@ -48,18 +48,31 @@ def command(name, **options):
         return function
     return decorator
 
+# This method needed to be defined in this file, else the tables variable
+# could not be found
+def db(**columns):
+    def decorator(function):
+        global tables
+        tables[function.__name__] = columns
+        return function
+    return decorator
+
 def reload_commands():
     #Loads all *.py files in plugins/ into cmd objects in the global commands dictionary
     logging.info("Reloading commands")
     global commands
     commands = {}
+    global tables
+    tables = {}
     command_files = glob.glob(os.path.join("plugins", "*.py"))
     for source in command_files:
         logging.info("Loading {0}".format(source))
         with open(source, 'r') as f:
             exec(compile(f.read(), source, "exec"))
-    return commands
+    return commands, tables
 
 def decorate_mans(leader, commands):
+    print("in decorate_mans, commands: ")
+    print(commands)
     for key, command in commands.items():
         commands[key].man = commands[key].man.format(leader=leader, command=key)

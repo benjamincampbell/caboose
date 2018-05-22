@@ -6,6 +6,7 @@ import queue
 import os
 
 import bot.command
+from .db import get_db, create_tables
 from .command import reload_commands
 from .connection import Connection
 from .line import Line
@@ -19,10 +20,13 @@ class Bot(object):
         self.LEADER = ''
         self.NICKSERV_EMAIL = ''
         self.NICKSERV_PASS = ''
-        self.COMMANDS = reload_commands()
+        self.DB_CONN = get_db()
+        self.COMMANDS, self.tables = reload_commands()
         self.SECRETS = []
         self.CONNECTIONS = {}
         self.CFG = self.read_config()
+
+        create_tables(self, self.tables)
 
         self.setup_google()
         self.setup_pydictionary()
