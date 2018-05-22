@@ -23,9 +23,24 @@ def create_tables(bot, tables):
     bot.DB_CONN.commit()
     c.close()
 
+def create_table(bot, table):
+    c = bot.DB_CONN.cursor()
+    print(table)
+    cols = []
+    sql = ("CREATE TABLE IF NOT EXISTS %s ("
+           "id INTEGER PRIMARY KEY AUTOINCREMENT, " % t)
+    for name, type in table.items():
+        cols.append("%s %s" % (name, type))
+    sql += ", ".join("?" * len(cols))
+    sql += ")"
+    print(sql)
+    c.execute(sql, cols)
+    bot.DB_CONN.commit()
+    c.close()
+
 def insert(bot, table_name, **values):
     # c = bot.DB_CONN.cursor()
-    values = {k: clean_string(v) for k, v in values.items()}
+    values = {k: v for k, v in values.items()}
     sql = "INSERT OR REPLACE INTO %s (" % table_name
     cols = []
     for c in values:
@@ -38,28 +53,29 @@ def insert(bot, table_name, **values):
     sql += ",".join("?" * len(vals))
     sql += ")"
     print(sql)
+    print(vals)
     c = bot.DB_CONN.cursor()
     c.execute(sql, vals)
     bot.DB_CONN.commit()
     c.close()
 
-def clean_string(s):
-    return re.sub('[^a-zA-Z0-9]', '', s)
-
 def get_equal(bot, table_name, **conditions):
-    values = {k: clean_string(v) for k, v in conditions.items()}
+    values = {k: v for k, v in conditions.items()}
     sql = ("SELECT * "
            "FROM %s " % table_name)
+    c = []
+    vals = []
 
     if len(conditions) > 0:
         sql += "WHERE "
-        c = []
         for col, val in conditions.items():
-            c.append("%s='%s'" % (col, val))
+            c.append("%s=?" % col)
+            vals.append(val)
         sql += " AND ".join(c)
         print(sql)
+        print(vals)
 
     c = bot.DB_CONN.cursor()
-    result = c.execute(sql).fetchall()
+    result = c.execute(sql, vals).fetchall()
     c.close()
     return result

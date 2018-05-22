@@ -3,10 +3,10 @@ from bot.command import command, db
 @command("setdata", man="sets arbitrary data for a user")
 @db(nick="TEXT UNIQUE", value="TEXT")
 def setdata(bot, line):
-    from bot.db import insert, clean_string
+    from bot.db import insert
 
     nick = line.user.nick
-    value = clean_string(line.text)
+    value = line.text
 
     insert(bot, "setdata", nick=nick, value=value)
 
@@ -16,16 +16,18 @@ def setdata(bot, line):
 @command("getdata", man="gets data of user")
 def getdata(bot, line):
     import random
-    from bot.db import get_equal, clean_string
+    from bot.db import get_equal
 
     nick = line.text
     results = get_equal(bot, "setdata", nick=nick)
+
     if len(results) > 0:
         result = random.choice(results)
     else:
         result = {
             "nick": line.text,
-            "value": "No value existed"}
+            "value": "No value existed"
+        }
 
     print(result)
 
