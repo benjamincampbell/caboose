@@ -220,7 +220,7 @@ def tags(bot, line):
     from bot.colors import color
     from plugins.lastfm import api_errors
 
-    TAGS_URL = "http://ws.audioscrobbler.com/2.0/?method=artist.gettoptags&artist={artist}&api_key={api_key}&format=json"
+    ARTIST_TAGS_URL = "http://ws.audioscrobbler.com/2.0/?method=artist.gettoptags&artist={artist}&api_key={api_key}&format=json"
     API_KEY = bot.SECRETS["api_keys"]["lastfm"]
 
     msg = ""
@@ -229,7 +229,7 @@ def tags(bot, line):
     if artist.strip() == "":
         line.conn.privmsg(line.args[0], "Please enter an artist.")
     else:
-        tags_response = requests.get(TAGS_URL.format(artist=artist, api_key=API_KEY))
+        tags_response = requests.get(ARTIST_TAGS_URL.format(artist=artist, api_key=API_KEY))
         tags_json = json.loads(tags_response.text)
 
         msg = ""
@@ -277,5 +277,93 @@ def musiccreep(bot, line):
     API_KEY = bot.SECRETS["api_keys"]["lastfm"]
 
     msg = get_last_played_track(username, API_KEY)
+
+    line.conn.privmsg(line.args[0], msg)
+
+def get_artists_for_tag(tag, api_key):
+    TAG_URL="http://ws.audioscrobbler.com/2.0/?method=tag.gettopartists&tag={tag}&api_key={api_key}&format=json&limit=269"
+
+    tag_response = requests.get(TAG_URL.format(tag=tag, api_key=api_key))
+    tag_json = json.loads(tag_response.text)
+
+    msg = ""
+    full_artist_list = []
+
+    if "topartists" in tag_json:
+        if "artist" in tag_json["topartists"]:
+            if tag_json["topartists"]["@attr"]["tag"] == "[unknown]":
+                logging.warning("API Error: Unknown tag, but not Error code 6")
+                raise Exception("Tag {0} not found.".format(color(tag, 'green')))
+            else:
+                if not tag_json["topartists"]["artist"]:
+                    raise Exception("No artists found for tag {tag}".format(
+                        tag=color(tag, 'green')
+                    ))
+                else:
+                    full_artist_list = tag_json["topartists"]["artist"]
+        else:
+            logging.warning("API Error: no ['artist'] key for {tag}".format(tag=tag))
+    else:
+        # Some sort of error in JSON
+        if "error" in tag_json:
+            logging.warning(api_errors(str(tag_json["error"])))
+            raise Exception("API Error, please have admin consult logs")
+        logging.warning("API Error: no ['topartists'] key for {tag}".format(tag=tag))
+        raise Exception("API Error: no ['topartists'] key for {tag}".format(tag=tag))
+
+    return full_artist_list
+
+
+@command("topartists", aliases=["ta"], man="See the top artists for the given tag. Usage: {leader}{command}")
+def topartists(bot, line):
+    import json
+    import requests
+    import logging
+    from bot.colors import color
+    from plugins.lastfm import api_errors, get_artists_for_tag
+
+    API_KEY = bot.SECRETS["api_keys"]["lastfm"]
+
+    tag = line.text
+
+    if tag.strip() == "":
+        line.conn.privmsg(line.args[0], "Please enter a tag.")
+        return None
+
+    full_artist_list = get_artists_for_tag(tag, API_KEY)
+    artist_list = []
+
+    msg = "Top artists for {0}:".format(color(tag, 'green'))
+
+    for a in full_artist_list:
+        if len(artist_list) < 8:
+            artist_list.append(a["name"])
+    msg += ",".join(map(lambda x: color(" "+x, 'lightblue'), artist_list))
+
+    line.conn.privmsg(line.args[0], msg)
+
+@command("explore", aliases=["randomartist", "ra"], man="Get a random artists for the given tag. Usage: {leader}{command}")
+def explore(bot, line):
+    import json
+    import requests
+    import logging
+    import random
+    from bot.colors import color
+    from plugins.lastfm import api_errors, get_artists_for_tag
+
+    API_KEY = bot.SECRETS["api_keys"]["lastfm"]
+
+    tag = line.text
+
+    if tag.strip() == "":
+        line.conn.privmsg(line.args[0], "Please enter a tag.")
+        return None
+    # try:
+    full_artist_list = get_artists_for_tag(tag, API_KEY)
+    artist = random.choice(full_artist_list)
+
+    msg = "Like {tag}? Try {artist}".format(tag=color(tag, "green"), artist=color(artist["name"], "lightblue"))
+    # except Exception as err:
+    # msg = str(err)
 
     line.conn.privmsg(line.args[0], msg)

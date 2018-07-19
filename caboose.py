@@ -4,17 +4,28 @@ import logging
 import os
 import sys
 
+from logging.handlers import TimedRotatingFileHandler
+
+log_name = "caboose.log"
+logger = logging.getLogger("Rotating Log")
+
 if len(sys.argv) > 1:
     if sys.argv[1] == "DEBUG":
-        logging.basicConfig(filename=os.path.abspath('caboose.log'),level=logging.DEBUG)
+        logger.setLevel(logging.DEBUG)
     elif sys.argv[1] == "INFO":
-        logging.basicConfig(filename=os.path.abspath('caboose.log'),level=logging.INFO)
+        logger.setLevel(logging.INFO)
     elif sys.argv[1] == "WARNING":
-        logging.basicConfig(filename=os.path.abspath('caboose.log'),level=logging.WARNING)
+        logger.setLevel(logging.WARNING)
     elif sys.argv[1] == "ERROR":
-        logging.basicConfig(filename=os.path.abspath('caboose.log'),level=logging.ERROR)
+        logger.setLevel(logging.ERROR)
 else:
-    logging.basicConfig(filename=os.path.abspath('caboose.log'),level=logging.INFO)
+    logger.setLevel(logging.INFO)
+
+handler = TimedRotatingFileHandler(log_name, when="midnight", interval=1)
+handler.suffix = "%Y-%m-%d"
+logger.addHandler(handler)
+
+logging.getLogger('googleapiclient.discovery_cache').setLevel(logging.ERROR)
 
 if __name__ == "__main__":
 

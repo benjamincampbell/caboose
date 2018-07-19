@@ -79,3 +79,23 @@ def get_equal(bot, table_name, **conditions):
     result = c.execute(sql, vals).fetchall()
     c.close()
     return result
+
+def delete(bot, table_name, **conditions):
+    values = {k: v for k, v in conditions.items()}
+    sql = ("DELETE "
+           "FROM %s " % table_name)
+    c = []
+    vals = []
+
+    if len(conditions) > 0:
+        sql += "WHERE "
+        for col, val in conditions.items():
+            c.append("%s=?" % col)
+            vals.append(val)
+        sql += " AND ".join(c)
+        print(sql)
+        print(vals)
+
+    c = bot.DB_CONN.cursor()
+    result = c.execute(sql, vals).fetchall()
+    c.close()

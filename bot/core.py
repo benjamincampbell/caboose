@@ -4,6 +4,8 @@ import time
 import threading
 import queue
 import os
+import sys
+import traceback
 
 import bot.command
 from .db import get_db, create_tables
@@ -73,20 +75,24 @@ class Bot(object):
             threads.append(t)
 
         while 1:
-            line = line_queue.get()
-            if line.type == 'MODE':
-                line.conn.initialize(self.NICKSERV_EMAIL, self.NICKSERV_PASS, self.NICK)
-            elif line.type == 'PING':
-                line.conn.pong(line.text)
-            elif line.type == 'PRIVMSG':
-                if line.command:
-                    # invoke associated command or error
-                    if (line.command in self.COMMANDS):
-                        if (self.COMMANDS[line.command].enabled):
-                            logging.info("{0}: {1} called {2} command with args: {3}".format(line.conn.SERVER.HOST, line.user, line.command, line.text))
-                            if (line.args[0] == self.NICK):
-                                line.args[0] = line.user.nick
+            try:
+                line = line_queue.get()
+                if line.type == 'MODE':
+                    line.conn.initialize(self.NICKSERV_EMAIL, self.NICKSERV_PASS, self.NICK)
+                elif line.type == 'PING':
+                    line.conn.pong(line.text)
+                elif line.type == 'PRIVMSG':
+                    if line.command:
+                        # invoke associated command or error
+                        if (line.command in self.COMMANDS):
+                            if (self.COMMANDS[line.command].enabled):
+                                logging.info("{0}: {1} called {2} command with args: {3}".format(line.conn.SERVER.HOST, line.user, line.command, line.text))
+                                if (line.args[0] == self.NICK):
+                                    line.args[0] = line.user.nick
 
-                            self.COMMANDS[line.command](self, line)
+                                self.COMMANDS[line.command](self, line)
 
-            line_queue.task_done()
+                line_queue.task_done()
+            except Exception as err:
+                logging.exception("Would've encountered fatal error")
+                print("Would've encountered fatal error, check logs")
