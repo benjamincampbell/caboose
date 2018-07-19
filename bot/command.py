@@ -75,4 +75,5 @@ def decorate_mans(leader, commands):
     print("in decorate_mans, commands: ")
     print(commands)
     for key, command in commands.items():
+        log.info("Decorating {cmd}".format(cmd=key))
         commands[key].man = commands[key].man.format(leader=leader, command=key)

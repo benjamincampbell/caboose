@@ -79,13 +79,17 @@ def lastfm(bot, line):
         server = " ".join(parts[:-1])
 
         wow_response = requests.get(WOW_CHAR_URL.format(realm=server, character=char, api_key=API_KEY))
-        wow_json = json.loads(wow_response.text)
+        try:
+            wow_json = json.loads(wow_response.text)
+        except ValueError:
+            line.conn.privmsg(line.args[0], "API Error")
+            return None
 
         msg = ""
 
         if "status" in wow_json:
             if wow_json["status"] == "nok":
-                msg = "Character not found"
+                msg = "Character not found, make sure to use !wow <realm> <character>"
         else:
             try:
                 name = color(wow_json["name"], "green")
