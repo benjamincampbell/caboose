@@ -179,6 +179,7 @@ def similar(bot, line):
 
     SIMILAR_URL = "http://ws.audioscrobbler.com/2.0/?method=artist.getsimilar&artist={artist}&api_key={api_key}&format=json"
     API_KEY = bot.SECRETS["api_keys"]["lastfm"]
+    logger = logging.getLogger("log")
 
     artist = line.text
 
@@ -194,7 +195,7 @@ def similar(bot, line):
         if "similarartists" in similar_json:
             if "artist" in similar_json["similarartists"]:
                 if similar_json["similarartists"]["@attr"]["artist"] == "[unknown]":
-                    logging.warning("API Error: Unknown artist, but not Error code 6")
+                    logger.warning("API Error: Unknown artist, but not Error code 6")
                     msg = "Artist {0} not found.".format(color(artist, 'green'))
                 else:
                     msg = "Artists similar to {0}:".format(color(similar_json["similarartists"]["@attr"]["artist"], 'green'))
@@ -203,13 +204,13 @@ def similar(bot, line):
                             artist_list.append(a["name"])
                     msg += ",".join(map(lambda x: color(" "+x, 'lightblue'), artist_list))
             else:
-                logging.warning("API Error: no ['artist'] key for {artist}".format(artist=artist))
+                logger.warning("API Error: no ['artist'] key for {artist}".format(artist=artist))
         else:
             # Some sort of error in JSON
             if "error" in similar_json:
                 msg = "API Error, please have admin consult logs"
-                logging.warning(api_errors(str(similar_json["error"])))
-            logging.warning("API Error: no ['similarartists'] key for {artist}".format(artist=artist))
+                logger.warning(api_errors(str(similar_json["error"])))
+            logger.warning("API Error: no ['similarartists'] key for {artist}".format(artist=artist))
         line.conn.privmsg(line.args[0], msg)
 
 @command(name="tags", aliases=["genre"], man="Get the top tags for a given artist. Usage: {leader}{command} <artist>")
@@ -222,6 +223,7 @@ def tags(bot, line):
 
     ARTIST_TAGS_URL = "http://ws.audioscrobbler.com/2.0/?method=artist.gettoptags&artist={artist}&api_key={api_key}&format=json"
     API_KEY = bot.SECRETS["api_keys"]["lastfm"]
+    logger = logging.getLogger("log")
 
     msg = ""
     artist = line.text
@@ -238,7 +240,7 @@ def tags(bot, line):
         if "toptags" in tags_json:
             if "tag" in tags_json["toptags"]:
                 if tags_json["toptags"]["@attr"]["artist"] == "[unknown]":
-                    logging.warning("API Error: Unknown artist, but not Error code 6")
+                    logger.warning("API Error: Unknown artist, but not Error code 6")
                     msg = "Artist {0} not found.".format(color(artist, 'green'))
                 else:
                     if not tags_json["toptags"]["tag"]:
@@ -252,13 +254,13 @@ def tags(bot, line):
                                 tag_list.append(t["name"])
                         msg += ",".join(map(lambda x: color(" "+x, 'lightblue'), tag_list))
             else:
-                logging.warning("API Error: no ['tag'] key for {artist}".format(artist=artist))
+                logger.warning("API Error: no ['tag'] key for {artist}".format(artist=artist))
         else:
             # Some sort of error in JSON
             if "error" in tags_json:
                 msg = "API Error, please have admin consult logs"
-                logging.warning(api_errors(str(tags_json["error"])))
-            logging.warning("API Error: no ['toptags'] key for {artist}".format(artist=artist))
+                logger.warning(api_errors(str(tags_json["error"])))
+            logger.warning("API Error: no ['toptags'] key for {artist}".format(artist=artist))
         line.conn.privmsg(line.args[0], msg)
 
 @command("musiccreep", aliases=["creep", "mc"], man="Obtain the last-played song of a random user who has a default "
@@ -285,6 +287,7 @@ def get_artists_for_tag(tag, api_key):
 
     tag_response = requests.get(TAG_URL.format(tag=tag, api_key=api_key))
     tag_json = json.loads(tag_response.text)
+    logger = logging.getLogger("log")
 
     msg = ""
     full_artist_list = []
@@ -292,7 +295,7 @@ def get_artists_for_tag(tag, api_key):
     if "topartists" in tag_json:
         if "artist" in tag_json["topartists"]:
             if tag_json["topartists"]["@attr"]["tag"] == "[unknown]":
-                logging.warning("API Error: Unknown tag, but not Error code 6")
+                logger.warning("API Error: Unknown tag, but not Error code 6")
                 raise Exception("Tag {0} not found.".format(color(tag, 'green')))
             else:
                 if not tag_json["topartists"]["artist"]:
@@ -302,13 +305,13 @@ def get_artists_for_tag(tag, api_key):
                 else:
                     full_artist_list = tag_json["topartists"]["artist"]
         else:
-            logging.warning("API Error: no ['artist'] key for {tag}".format(tag=tag))
+            logger.warning("API Error: no ['artist'] key for {tag}".format(tag=tag))
     else:
         # Some sort of error in JSON
         if "error" in tag_json:
-            logging.warning(api_errors(str(tag_json["error"])))
+            logger.warning(api_errors(str(tag_json["error"])))
             raise Exception("API Error, please have admin consult logs")
-        logging.warning("API Error: no ['topartists'] key for {tag}".format(tag=tag))
+        logger.warning("API Error: no ['topartists'] key for {tag}".format(tag=tag))
         raise Exception("API Error: no ['topartists'] key for {tag}".format(tag=tag))
 
     return full_artist_list

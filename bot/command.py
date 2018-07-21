@@ -59,7 +59,8 @@ def db(**columns):
 
 def reload_commands():
     #Loads all *.py files in plugins/ into cmd objects in the global commands dictionary
-    logging.info("Reloading commands")
+    logger = logging.getLogger("log")
+    logger.info("Reloading commands")
     global commands
     commands = {}
     global tables
@@ -72,8 +73,8 @@ def reload_commands():
     return commands, tables
 
 def decorate_mans(leader, commands):
-    print("in decorate_mans, commands: ")
-    print(commands)
+    logger = logging.getLogger("Rotating Log")
+    logger.info("Decorating Mans")
     for key, command in commands.items():
-        log.info("Decorating {cmd}".format(cmd=key))
+        logger.info("Decorating {cmd}".format(cmd=key))
         commands[key].man = commands[key].man.format(leader=leader, command=key)

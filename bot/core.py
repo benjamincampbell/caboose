@@ -86,7 +86,8 @@ class Bot(object):
                         # invoke associated command or error
                         if (line.command in self.COMMANDS):
                             if (self.COMMANDS[line.command].enabled):
-                                logging.info("{0}: {1} called {2} command with args: {3}".format(line.conn.SERVER.HOST, line.user, line.command, line.text))
+                                logger = logging.getLogger("log")
+                                logger.info("{0}: {1} called {2} command with args: {3}".format(line.conn.SERVER.HOST, line.user, line.command, line.text))
                                 if (line.args[0] == self.NICK):
                                     line.args[0] = line.user.nick
 
@@ -94,5 +95,5 @@ class Bot(object):
 
                 line_queue.task_done()
             except Exception as err:
-                logging.exception("Would've encountered fatal error")
-                print("Would've encountered fatal error, check logs")
+                logger = logging.getLogger("log")
+                logger.exception("Would've encountered fatal error")

@@ -23,14 +23,16 @@ class Connection(object):
         self.SOCK = socket.socket()
         if self.SERVER.SSL:
             self.SOCK = ssl.wrap_socket(self.SOCK)
-        logging.info("{0} connecting to server".format(self))
+        logger = logging.getLogger("log")
+        logger.info("{0} connecting to server".format(self))
         self.SOCK.connect((self.SERVER.HOST, self.SERVER.PORT))
         self.CONNECTED = True
 
     def socket_disconnect(self):
         self.SOCK = None
+        logger = logging.getLogger("log")
+        logger.info("Disconnecting from server: {0}".format(self.SERVER.HOST))
         print("Disconnecting from server: {0}".format(self.SERVER.HOST))
-        logging.info("Disconnecting from server: {0}".format(self.SERVER.HOST))
         self.CONNECTED = False
 
     def start(self, leader, nickname, line_queue):
@@ -43,7 +45,7 @@ class Connection(object):
             while True:
                 data = self.recv()
                 for l in data.splitlines():
-                    logging.info('{}'.format(l))
+                    logger = logging.getLogger("log")
                     line = Line(self, l)
                     line.parse_line(leader)
                     line_queue.put(line)
@@ -59,7 +61,8 @@ class Connection(object):
         """
         Send information to server
         """
-        logging.info("{0} sendraw: {1}".format(self, string.encode()))
+        logger = logging.getLogger("log")
+        logger.info("{0} sendraw: {1}".format(self, string.encode()))
         self.SOCK.send('{}\r\n'.format(string).encode())
 
     def pwd(self):

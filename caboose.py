@@ -6,8 +6,11 @@ import sys
 
 from logging.handlers import TimedRotatingFileHandler
 
-log_name = "caboose.log"
-logger = logging.getLogger("Rotating Log")
+if not os.path.exists("logs"):
+    os.makedirs("logs")
+
+log_name = "logs/caboose.log"
+logger = logging.getLogger("log")
 
 if len(sys.argv) > 1:
     if sys.argv[1] == "DEBUG":
