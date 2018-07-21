@@ -44,3 +44,4 @@ ignore.txt
 caboose.db
 config.yaml
 __pycache__/
+logs/
