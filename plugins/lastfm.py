@@ -437,7 +437,7 @@ def top(bot, line):
         "-y":"last year"
     }
 
-    msg = "{user}'s most played artists ({time_period}):".format(user=username, time_period=time_periods[tag])
+    msg = "{user}'s most played artists ({time_period}):".format(user=color(username, "green"), time_period=time_periods[tag])
     msg += ",".join(map(lambda x: color(" "+x[0], 'lightblue')+" ({})".format(x[1]), artist_counts))
 
     line.conn.privmsg(line.args[0], msg)
