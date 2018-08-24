@@ -32,6 +32,7 @@ def api_errors(e):
         "Usage: {leader}{command} [-default] <username>")
 @db(nick="STRING UNIQUE", username="STRING")
 def lastfm(bot, line):
+    from bot.colors import color
     from bot.db import insert, get_equal
     from plugins.lastfm import get_last_played_track
 
@@ -264,27 +265,47 @@ def tags(bot, line):
             logger.warning("API Error: no ['toptags'] key for {artist}".format(artist=artist))
         line.conn.privmsg(line.args[0], msg)
 
-@command("musiccreep", aliases=["creep", "mc"], man="Obtain the last-played song of a random user who has a default "
-        "Last.fm username set via !lastfm. Usage: {leader}{command}")
 
 # TODO: add feature to enqueue a # of creeps, no repeats. I.e. !mc 3 to creep on 3 people in a row, no repeats.
-
+@command("musiccreep", aliases=["creep", "mc"], man="Obtain the last-played song of a random user who has a default "
+        "Last.fm username set via !lastfm. Optionally supply number to enqueue creeps. Usage: {leader}{command} <number>")
 def musiccreep(bot, line):
     import random
-
+    import time
     from bot.db import get_equal
     from plugins.lastfm import get_last_played_track
 
-    results = get_equal(bot, "lastfm")
-    print(results)
-    choice = random.choice(results)
 
-    username = choice["username"]
     API_KEY = bot.SECRETS["api_keys"]["lastfm"]
+    num = 1
 
-    msg = get_last_played_track(username, API_KEY)
+    linesplit = line.text.split()
+    if len(linesplit) > 1:
+        # too many arguments
+        line.conn.privmsg(line.user.nick, "Too many arguments supplied")
+        return None
+    elif len(linesplit) == 1:
+        if linesplit[0].isdigit() and int(linesplit[0]) < 6:
+            num = int(linesplit[0])
+        else:
+            line.conn.privmsg(line.user.nick, "Please enter a number 5 or fewer.")
 
-    line.conn.privmsg(line.args[0], msg)
+    # else no args
+
+    results = get_equal(bot, "lastfm")
+
+    if num > len(results):
+        num = len(results)
+
+    choices = random.sample(results, num)
+
+    print(choices)
+    for u in choices:
+        username = u["username"]
+        msg = get_last_played_track(username, API_KEY)
+
+        line.conn.privmsg(line.args[0], msg)
+        time.sleep(2)
 
 def get_artists_for_tag(tag, api_key):
     TAG_URL="http://ws.audioscrobbler.com/2.0/?method=tag.gettopartists&tag={tag}&api_key={api_key}&format=json&limit=269"
