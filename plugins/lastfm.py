@@ -90,6 +90,7 @@ def get_last_played_track(username, api_key):
     try:
         recent_json = json.loads(recent_response.text)
     except ValueError:
+        logger.severe("Error parsing response: {response}".format(response=recent_response))
         line.conn.privmsg(line.args[0], "Error parsing JSON response")
         return None
 
@@ -265,6 +266,9 @@ def tags(bot, line):
 
 @command("musiccreep", aliases=["creep", "mc"], man="Obtain the last-played song of a random user who has a default "
         "Last.fm username set via !lastfm. Usage: {leader}{command}")
+
+# TODO: add feature to enqueue a # of creeps, no repeats. I.e. !mc 3 to creep on 3 people in a row, no repeats.
+
 def musiccreep(bot, line):
     import random
 
@@ -370,3 +374,98 @@ def explore(bot, line):
     # msg = str(err)
 
     line.conn.privmsg(line.args[0], msg)
+
+@command("top", man="Get the top artists for a user in the given time frame. Usage: {leader}{command} [-w|-m|-y|-a] <username>")
+def top(bot, line):
+    import json
+    import requests
+    import logging
+    from bot.db import insert, get_equal
+    from bot.colors import color
+    from plugins.lastfm import get_top_artists_for_user
+
+    logger = logging.getLogger("log")
+    # Example: !top -w twitch043    top artists of the last week for user twitch043
+    #          !top -y              top artists of the last year for default user, else error
+    #          !top twitch043       top artists of all time for user twitch043
+    #          !top                 top artists of all time for default user, else error
+
+    API_KEY = bot.SECRETS["api_keys"]["lastfm"]
+    tag = ""
+    user = ""
+    artist_counts = []
+
+    linesplit = line.text.split()
+
+    for a in linesplit:
+        if a[0] == '-':
+            if a[1:] not in ["a", "w", "m", "y"]:
+                line.conn.privmsg(line.args[0], "Not a valid argument")
+                return None
+            tag = a
+        else:
+            user = a
+
+    if (tag == ""):
+        # no tag, default to all time
+        tag = "-a"
+
+    if (user == ""):
+        # supplied no user, obtain default user
+        try:
+            result = get_equal(bot, "lastfm", nick=line.user.nick)[0]
+            user = result["username"]
+        except IndexError:
+            # no row found, username not in table
+            line.conn.privmsg(line.args[0], "No username given, nor a default for {nick} found.".format(nick=line.user.nick))
+            return None
+
+    else:
+        logger.warning("No tag nor username conditions matched for lastfm top")
+        # something else?
+
+    try:
+        username, artist_counts = get_top_artists_for_user(API_KEY, user, tag)
+    except TypeError:
+        line.conn.privmsg(line.args[0], "Username not found")
+        return None
+
+    time_periods = {
+        "-a":"all time",
+        "-w":"last week",
+        "-m":"last month",
+        "-y":"last year"
+    }
+
+    msg = "{user}'s most played artists ({time_period}):".format(user=username, time_period=time_periods[tag])
+    msg += ",".join(map(lambda x: color(" "+x[0], 'lightblue')+" ({})".format(x[1]), artist_counts))
+
+    line.conn.privmsg(line.args[0], msg)
+
+def get_top_artists_for_user(API_KEY, user, time_arg="-a"):
+    logger = logging.getLogger("log")
+
+    time_periods = {
+        "-a":"overall",
+        "-w":"7day",
+        "-m":"1month",
+        "-y":"12month"
+    }
+
+    artist_counts = []
+
+    period = time_periods[time_arg]
+
+    TOP_ARTISTS_URL = "http://ws.audioscrobbler.com/2.0/?method=user.gettopartists&api_key={api_key}&user={user}&period={time_period}&format=json"
+
+    top_response = requests.get(TOP_ARTISTS_URL.format(api_key=API_KEY, user=user, time_period=period))
+    top_json = json.loads(top_response.text)
+
+    try:
+        for artist in top_json["topartists"]["artist"]:
+            if len(artist_counts) < 8:
+                artist_counts.append((artist["name"], artist["playcount"]))
+        username = top_json["topartists"]["@attr"]["user"]
+        return (username, artist_counts)
+    except KeyError:
+        logger.warning("API Error. JSON: {json}".format(json=top_json))
