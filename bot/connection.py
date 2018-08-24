@@ -54,7 +54,12 @@ class Connection(object):
         """
         Receive data and return it
         """
-        message = self.SOCK.recv(2048).decode("utf-8")
+        try:
+            message = self.SOCK.recv(2048).decode("utf-8")
+        except UnicodeDecodeError:
+            logger = logging.getLogger("log")
+            logger.warning("Would have errored")
+            return "null"
         return message
 
     def sendraw(self, string):
