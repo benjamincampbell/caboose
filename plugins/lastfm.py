@@ -396,7 +396,7 @@ def explore(bot, line):
 
     line.conn.privmsg(line.args[0], msg)
 
-@command("top", man="Get the top artists for a user in the given time frame. Usage: {leader}{command} [-w|-m|-y|-a] <username>")
+@command("top", man="Get the top artists for a user in the given time frame. Usage: {leader}{command} [-w|-m|-3m|-y|-a] <username>")
 def top(bot, line):
     import json
     import requests
@@ -420,7 +420,7 @@ def top(bot, line):
 
     for a in linesplit:
         if a[0] == '-':
-            if a[1:] not in ["a", "w", "m", "y"]:
+            if a[1:] not in ["a", "w", "m", "3m", "y"]: # TODO: move time_periods up here, use keys
                 line.conn.privmsg(line.args[0], "Not a valid argument")
                 return None
             tag = a
@@ -455,6 +455,7 @@ def top(bot, line):
         "-a":"all time",
         "-w":"last week",
         "-m":"last month",
+        "-3m":"last three months",
         "-y":"last year"
     }
 
@@ -470,6 +471,7 @@ def get_top_artists_for_user(API_KEY, user, time_arg="-a"):
         "-a":"overall",
         "-w":"7day",
         "-m":"1month",
+        "-3m":"3month",
         "-y":"12month"
     }
 
