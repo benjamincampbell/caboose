@@ -215,7 +215,7 @@ def similar(bot, line):
             logger.warning("API Error: no ['similarartists'] key for {artist}".format(artist=artist))
         line.conn.privmsg(line.args[0], msg)
 
-@command(name="tags", aliases=["genre"], man="Get the top tags for a given artist. Usage: {leader}{command} <artist>")
+@command(name="tags", aliases=["genre","genres"], man="Get the top tags for a given artist. Usage: {leader}{command} <artist>")
 def tags(bot, line):
     import json
     import requests

@@ -31,7 +31,7 @@ def google(bot, line):
         except Exception as e:
             logger = logging.getLogger("log")
             logger.warning("Error: {0}".format(e))
-            line.conn.privmsg(line.args[0], "Error: {0}".format(e))
+            line.conn.privmsg(line.args[0], "Error: Check logs")
 
 @command("image", aliases = ["gis"], man = "Perform a google image search, returning the first result. Usage: {leader}{command} <query>")
 def image(bot, line):
@@ -63,4 +63,4 @@ def image(bot, line):
         except Exception as e:
             logger = logging.getLogger("log")
             logger.warning("Error: {0}".format(e))
-            line.conn.privmsg(line.args[0], "Error: {0}".format(e))
+            line.conn.privmsg(line.args[0], "Error, check logs")
