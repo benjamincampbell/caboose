@@ -20,11 +20,14 @@ def google(bot, line):
             res = search_res["items"][0]
             title = res["title"]
             link = res["link"]
+            displaylink = res["displayLink"]
+            print(res)
 
             short_url = shorten_url(bot, link)
 
-            text = "{0} - {1}".format(
+            text = "{0} - {1} - {2}".format(
                 short_url,
+                displaylink,
                 title)
 
             line.conn.privmsg(line.args[0], text)
