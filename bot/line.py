@@ -43,7 +43,7 @@ class Line:
                 if p[0] == ':':
                     message = True
                     try:
-                        if p[1] == leader:
+                        if p[1] in leader:
                             self.command = p.strip()[2:]
                         else:
                             txt.append(p.strip()[1:])
