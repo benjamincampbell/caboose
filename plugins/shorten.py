@@ -1,12 +1,14 @@
 import requests
 
 def shorten_url(bot, url):
-    API_KEY = bot.SECRETS["other"]["worf_shorten_key"]
+    API_KEY = bot.SECRETS["other"]["noxd_shorten_key"]
 
-    response = requests.post("http://worf.co", data={'text':url,
-        'shorten_key':API_KEY})
+    host = "https://noxd.co/"
+
+    response = requests.post(host, data={'link':url,
+        'api_key':API_KEY}).json()
 
     try:
-        return response.text
+        return host + response['Id']
     except Exception as e:
         return "Error: {0}".format(e)

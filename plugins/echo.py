@@ -4,4 +4,7 @@ from bot.command import command
 def echo(bot, line):
     from bot.colors import color
     
-    line.conn.privmsg(line.args[0], line.text)
+    if (line.text == "i'm an idiot"):
+        line.conn.privmsg(line.args[0], "you're an idiot")
+    else:
+        line.conn.privmsg(line.args[0], line.text)

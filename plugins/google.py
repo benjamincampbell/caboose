@@ -3,6 +3,7 @@ from bot.command import command
 @command("google", aliases = ["g"], man = "Perform a google search, returning the first result. Usage: {leader}{command} <query>")
 def google(bot, line):
     from plugins.shorten import shorten_url
+    import random
 
     query = line.text
     if query == "":
@@ -31,6 +32,10 @@ def google(bot, line):
                 title)
 
             line.conn.privmsg(line.args[0], text)
+        except KeyError as e:
+            logger = logging.getLogger("log")
+            logger.warning("Error: {0}".format(e))
+            line.conn.privmsg(line.args[0], "No results found.")
         except Exception as e:
             logger = logging.getLogger("log")
             logger.warning("Error: {0}".format(e))
@@ -63,6 +68,10 @@ def image(bot, line):
                 )
 
             line.conn.privmsg(line.args[0], text)
+        except KeyError as e:
+            logger = logging.getLogger("log")
+            logger.warning("Error: {0}".format(e))
+            line.conn.privmsg(line.args[0], "No results found.")
         except Exception as e:
             logger = logging.getLogger("log")
             logger.warning("Error: {0}".format(e))

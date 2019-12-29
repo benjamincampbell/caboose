@@ -1,5 +1,5 @@
-@command("oracle", man = "Chooses at random from a selection. Usage: {leader}{command} option1, option2, option3")
-def oracle(bot, line):
+@command("council", man = "Chooses at random from a selection. Usage: {leader}{command} option1, option2, option3")
+def council(bot, line):
     import random
     choices = line.text.split(sep = ",")
     

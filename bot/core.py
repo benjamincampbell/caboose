@@ -59,8 +59,8 @@ class Bot(object):
     def setup_google(self):
         self.google_search_service = build("customsearch", "v1",
             developerKey=self.SECRETS["api_keys"]["google"])
-        self.google_urlshortener_service = build("urlshortener", "v1",
-            developerKey=self.SECRETS["api_keys"]["google"])
+        #self.google_urlshortener_service = build("urlshortener", "v1",
+            #developerKey=self.SECRETS["api_keys"]["google"])
 
     def setup_pydictionary(self):
         self.dictionary = PyDictionary()

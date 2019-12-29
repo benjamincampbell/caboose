@@ -210,7 +210,7 @@ def similar(bot, line):
         else:
             # Some sort of error in JSON
             if "error" in similar_json:
-                msg = "API Error, please have admin consult logs"
+                msg = "API Error: artist not found."
                 logger.warning(api_errors(str(similar_json["error"])))
             logger.warning("API Error: no ['similarartists'] key for {artist}".format(artist=artist))
         line.conn.privmsg(line.args[0], msg)
@@ -260,7 +260,7 @@ def tags(bot, line):
         else:
             # Some sort of error in JSON
             if "error" in tags_json:
-                msg = "API Error, please have admin consult logs"
+                msg = "API Error: artist not found"
                 logger.warning(api_errors(str(tags_json["error"])))
             logger.warning("API Error: no ['toptags'] key for {artist}".format(artist=artist))
         line.conn.privmsg(line.args[0], msg)
@@ -335,7 +335,7 @@ def get_artists_for_tag(tag, api_key):
         # Some sort of error in JSON
         if "error" in tag_json:
             logger.warning(api_errors(str(tag_json["error"])))
-            raise Exception("API Error, please have admin consult logs")
+            raise Exception("API Error: Artist not found")
         logger.warning("API Error: no ['topartists'] key for {tag}".format(tag=tag))
         raise Exception("API Error: no ['topartists'] key for {tag}".format(tag=tag))
 
