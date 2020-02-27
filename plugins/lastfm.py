@@ -27,7 +27,7 @@ def api_errors(e):
     }
     return errors[e]
 
-@command("lastfm", aliases=["nowplaying", "lfm", "np"], man="Obtains most recently played song for a given Last.fm user. "
+@command("lastfm", aliases=["nowplaying", "lfm", "np", "l"], man="Obtains most recently played song for a given Last.fm user. "
         "-default to set default user for your nick, to use if no username given. "
         "Usage: {leader}{command} [-default] <username>")
 @db(nick="STRING UNIQUE", username="STRING")
@@ -227,6 +227,18 @@ def tags(bot, line):
     API_KEY = bot.SECRETS["api_keys"]["lastfm"]
     logger = logging.getLogger("log")
 
+    ignore_tags = [
+            "seen live",
+            "seenlive",
+            "seen",
+            "live",
+            "england",
+            "uk",
+            "britain",
+            "british",
+            "english"
+            ]
+
     msg = ""
     artist = line.text
 
@@ -252,7 +264,7 @@ def tags(bot, line):
                     else:
                         msg = "Top tags for {0}:".format(color(tags_json["toptags"]["@attr"]["artist"], 'green'))
                         for t in tags_json["toptags"]["tag"]:
-                            if len(tag_list) < 8:
+                            if len(tag_list) < 8 and t["name"].lower() not in ignore_tags:
                                 tag_list.append(t["name"])
                         msg += ",".join(map(lambda x: color(" "+x, 'lightblue'), tag_list))
             else:

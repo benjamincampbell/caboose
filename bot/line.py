@@ -40,17 +40,20 @@ class Line:
         message = False
         for p in parts:
             if not message:
-                if p[0] == ':':
-                    message = True
-                    try:
-                        if p[1] in leader:
-                            self.command = p.strip()[2:]
-                        else:
-                            txt.append(p.strip()[1:])
-                    except IndexError:
-                        pass
-                else:
-                    self.args.append(p.strip())
+                try:
+                    if p[0] == ':':
+                        message = True
+                        try:
+                            if p[1] in leader:
+                                self.command = p.strip()[2:]
+                            else:
+                                txt.append(p.strip()[1:])
+                        except IndexError:
+                            pass
+                    else:
+                        self.args.append(p.strip())
+                except:
+                    pass
             else:
                 txt.append(p.strip())
         self.text = ' '.join(txt)
