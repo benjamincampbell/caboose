@@ -382,7 +382,7 @@ def topartists(bot, line):
 
     line.conn.privmsg(line.args[0], msg)
 
-@command("explore", aliases=["randomartist", "ra"], man="Get a random artists for the given tag. Usage: {leader}{command}")
+@command("explore", aliases=["ex"], man="Get a random artists for the given tag. Usage: {leader}{command}")
 def explore(bot, line):
     import json
     import requests
@@ -458,7 +458,7 @@ def top(bot, line):
         # something else?
 
     try:
-        username, artist_counts = get_top_artists_for_user(API_KEY, user, tag)
+        username, artist_counts = get_top_artists_for_user(API_KEY, user, tag, 8)
     except TypeError:
         line.conn.privmsg(line.args[0], "Username not found")
         return None
@@ -476,7 +476,65 @@ def top(bot, line):
 
     line.conn.privmsg(line.args[0], msg)
 
-def get_top_artists_for_user(API_KEY, user, time_arg="-a"):
+
+@command("randomartist", aliases=["ra", "randartist"], man="Get a random artist starting with a given letter from a user's library. Usage: {leader}{command} <letter> <username>")
+def randomartist(bot, line):
+    import json
+    import requests
+    import logging
+    import random
+    from bot.db import insert, get_equal
+    from bot.colors import color
+    from plugins.lastfm import get_top_artists_for_user
+
+    logger = logging.getLogger("log")
+
+    API_KEY = bot.SECRETS["api_keys"]["lastfm"]
+
+    linesplit = line.text.split()
+
+    if len(linesplit) < 1 or len(linesplit) > 2:
+        line.conn.privmsg(line.args[0], "Improper number of arguments given")
+        return None
+
+    user = ""
+
+    letter = linesplit[0]
+
+    if len(letter) > 1:
+        line.conn.privmsg(line.args[0], "Please supply a letter with the first argument")
+        return None
+
+    try:
+        user = linesplit[1]
+    except IndexError:
+        try:
+            result = get_equal(bot, "lastfm", nick=line.user.nick)[0]
+            user = result["username"]
+        except IndexError:
+            # no row found, username not in table
+            line.conn.privmsg(line.args[0], "No username given, nor a default for {nick} found.".format(nick=line.user.nick))
+            return None
+
+    try:
+        # Get a bunch of artists
+        username, artist_counts = get_top_artists_for_user(API_KEY, user, "-a", 1000)
+    except TypeError:
+        line.conn.privmsg(line.args[0], "Username not found")
+        return None
+
+    letter_artists = [artist[0] for artist in artist_counts if artist[0].startswith(letter)]
+
+    if len(letter_artists) == 0:
+        line.conn.privmsg(line.args[0], "No artists found starting with the letter {0}".format(letter))
+
+    final_choice = random.choice(letter_artists)
+    
+    line.conn.privmsg(line.args[0], final_choice)
+
+
+
+def get_top_artists_for_user(API_KEY, user, time_arg="-a", max_artists=8):
     logger = logging.getLogger("log")
 
     time_periods = {
@@ -498,7 +556,7 @@ def get_top_artists_for_user(API_KEY, user, time_arg="-a"):
 
     try:
         for artist in top_json["topartists"]["artist"]:
-            if len(artist_counts) < 8:
+            if len(artist_counts) < max_artists:
                 artist_counts.append((artist["name"], artist["playcount"]))
         username = top_json["topartists"]["@attr"]["user"]
         return (username, artist_counts)
