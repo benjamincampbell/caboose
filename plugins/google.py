@@ -76,3 +76,40 @@ def image(bot, line):
             logger = logging.getLogger("log")
             logger.warning("Error: {0}".format(e))
             line.conn.privmsg(line.args[0], "Error, check logs")
+
+
+@command("gif", aliases = [], man = "Perform a google image search, returning the the first gif. Usage: {leader}{command} <query>")
+def image(bot, line):
+    from plugins.shorten import shorten_url
+
+    query = line.text
+    if query == "":
+        line.conn.privmsg(line.args[0], "Please enter a search query")
+    else:
+        cse_id = bot.SECRETS["other"]["google_cse_id"]
+
+        try:
+            search_res = bot.google_search_service.cse().list(
+                q=query + " filetype:gif",
+                cx=cse_id,
+                searchType="image",
+            ).execute()
+
+            res = search_res["items"][0]
+            link = res["link"]
+
+            short_url = shorten_url(bot, link)
+
+            text = "{0}".format(
+                short_url,
+                )
+
+            line.conn.privmsg(line.args[0], text)
+        except KeyError as e:
+            logger = logging.getLogger("log")
+            logger.warning("Error: {0}".format(e))
+            line.conn.privmsg(line.args[0], "No results found.")
+        except Exception as e:
+            logger = logging.getLogger("log")
+            logger.warning("Error: {0}".format(e))
+            line.conn.privmsg(line.args[0], "Error, check logs")
