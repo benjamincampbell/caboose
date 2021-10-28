@@ -27,7 +27,7 @@ def api_errors(e):
     }
     return errors[e]
 
-@command("lastfm", aliases=["nowplaying", "lfm", "np", "l"], man="Obtains most recently played song for a given Last.fm user. "
+@command("lastfm", aliases=["nowplaying", "lfm", "np"], man="Obtains most recently played song for a given Last.fm user. "
         "-default to set default user for your nick, to use if no username given. "
         "Usage: {leader}{command} [-default] <username>")
 @db(nick="STRING UNIQUE", username="STRING")
@@ -408,7 +408,69 @@ def explore(bot, line):
 
     line.conn.privmsg(line.args[0], msg)
 
-@command("top", man="Get the top artists for a user in the given time frame. Usage: {leader}{command} [-w|-m|-3m|-y|-a] <username>")
+@command("plays", aliases=["p"], man="Get the number of plays of an artist for a given user. Usage: {leader}{command} <artist>")
+def plays(bot, line):
+    import logging
+    import json
+    import requests
+    from bot.db import get_equal
+    from bot.colors import color
+    from plugins.lastfm import get_artist_plays_for_user
+    
+    logger = logging.getLogger("log")
+
+    API_KEY = bot.SECRETS["api_keys"]["lastfm"]
+    user = ""
+    balls = 0
+
+    try:
+        result = get_equal(bot, "lastfm", nick=line.user.nick)[0]
+        user = result["username"]
+    except IndexError:
+        line.conn.privmsg(line.args[0], "Please set a default username first.")
+        return None
+    
+    artist = line.text
+
+    if artist == "":
+        line.conn.privmsg(line.args[0], "Please supply an artist.")
+        return None
+    
+    balls = get_artist_plays_for_user(artist, user, API_KEY)
+
+    msg = "{user} has listened to {artist} {playcount} times".format(user=color(user, "green"), artist=color(artist, "lightblue"), playcount=color(balls,"green"))
+
+    line.conn.privmsg(line.args[0], msg)
+
+
+def get_artist_plays_for_user(a,b,c):
+    return "1"
+"""
+def get_artist_plays_for_user(artist, user, api_key):
+    PLAYS_URL = "http://ws.audioscrobbler.com/2.0/?method=artist.getinfo&artist={artist}&api_key={api_key}&format=json&username={user}"
+    
+    response = requests.get(PLAYS_URL.format(artist=artist, api_key=api_key, user=user))
+
+    balls = 0
+ 
+    try:
+        plays_json = json.loads(response.text)
+    except ValueError:
+        logger.severe("Error parsing response: {response}".format(response=response))
+        line.conn.privmsg(line.args[0], "Error parsing JSON response")
+        return None
+
+    try:
+        balls = plays_json["artist"]["stats"]["userplaycount"]
+    except:
+        line.conn.privmsg(line.args[0], "Something went wrong. Does this artist exist?")
+        return None
+
+    return balls
+"""
+
+
+@command("top", man="Get the top artists for a user in the given time frame. Usage: {leader}{command} [-w|-m|-3m|-y|-a] (<username>)")
 def top(bot, line):
     import json
     import requests
