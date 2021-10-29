@@ -409,6 +409,8 @@ def explore(bot, line):
 @command("plays", aliases=["p"], man="Get the number of plays of an artist for a given user. Usage: {leader}{command} <artist>")
 def plays(bot, line):
     import logging
+    import json
+    import requests
     from bot.db import get_equal
     from bot.colors import color
     from plugins.lastfm import get_last_played_track
@@ -433,25 +435,12 @@ def plays(bot, line):
         line.conn.privmsg(line.args[0], "Please supply an artist.")
         return None
     
-    balls = get_artist_plays_for_user(artist, user, API_KEY)
+    # TODO: Put the API call in its own function like the other commands, couldn't get past ImportError for some reason
 
-    msg = "{user} has listened to {artist} {playcount} times".format(user=color(user, "green"), artist=color(artist, "lightblue"), playcount=color(balls,"green"))
-
-    line.conn.privmsg(line.args[0], msg)
-
-def get_artist_plays_for_user(artist, user, api_key):
-    import logging
-    import json
-    import requests
-
-    logger = logging.getLogger("log")
-
-    PLAYS_URL = "http://ws.audioscrobbler.com/2.0/?method=artist.getinfo&artist={artist}&api_key={api_key}&format=json&username={user}"
+    PLAYS_URL = "http://ws.audioscrobbler.com/2.0/?method=artist.getinfo&artist={artist}&api_key={api_key}&format=json&username={username}"
     
-    response = requests.get(PLAYS_URL.format(artist=artist, api_key=api_key, user=user))
+    response = requests.get(PLAYS_URL.format(artist=artist, api_key=API_KEY, username=user))
 
-    balls = 0
- 
     try:
         plays_json = json.loads(response.text)
     except ValueError:
@@ -463,7 +452,9 @@ def get_artist_plays_for_user(artist, user, api_key):
     except:
         return None
 
-    return balls
+    msg = "{user} has listened to {artist} {playcount} times".format(user=color(user, "green"), artist=color(artist, "lightblue"), playcount=color(balls,"green"))
+
+    line.conn.privmsg(line.args[0], msg)
 
 @command("top", man="Get the top artists for a user in the given time frame. Usage: {leader}{command} [-w|-m|-3m|-y|-a] (<username>)")
 def top(bot, line):
