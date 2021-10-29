@@ -413,8 +413,6 @@ def plays(bot, line):
     import requests
     from bot.db import get_equal
     from bot.colors import color
-    from plugins.lastfm import get_last_played_track
-    from plugins.lastfm import get_artist_plays_for_user
     
     logger = logging.getLogger("log")
 
@@ -449,6 +447,7 @@ def plays(bot, line):
 
     try:
         balls = plays_json["artist"]["stats"]["userplaycount"]
+        artist = plays_json["artist"]["name"]
     except:
         return None
 
