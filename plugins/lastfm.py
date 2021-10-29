@@ -411,8 +411,6 @@ def explore(bot, line):
 @command("plays", aliases=["p"], man="Get the number of plays of an artist for a given user. Usage: {leader}{command} <artist>")
 def plays(bot, line):
     import logging
-    import json
-    import requests
     from bot.db import get_equal
     from bot.colors import color
     from plugins.lastfm import get_artist_plays_for_user
@@ -442,11 +440,13 @@ def plays(bot, line):
 
     line.conn.privmsg(line.args[0], msg)
 
-
-def get_artist_plays_for_user(a,b,c):
-    return "1"
-"""
 def get_artist_plays_for_user(artist, user, api_key):
+    import logging
+    import json
+    import requests
+
+    logger = logging.getLogger("log")
+
     PLAYS_URL = "http://ws.audioscrobbler.com/2.0/?method=artist.getinfo&artist={artist}&api_key={api_key}&format=json&username={user}"
     
     response = requests.get(PLAYS_URL.format(artist=artist, api_key=api_key, user=user))
@@ -457,18 +457,14 @@ def get_artist_plays_for_user(artist, user, api_key):
         plays_json = json.loads(response.text)
     except ValueError:
         logger.severe("Error parsing response: {response}".format(response=response))
-        line.conn.privmsg(line.args[0], "Error parsing JSON response")
         return None
 
     try:
         balls = plays_json["artist"]["stats"]["userplaycount"]
     except:
-        line.conn.privmsg(line.args[0], "Something went wrong. Does this artist exist?")
         return None
 
     return balls
-"""
-
 
 @command("top", man="Get the top artists for a user in the given time frame. Usage: {leader}{command} [-w|-m|-3m|-y|-a] (<username>)")
 def top(bot, line):
