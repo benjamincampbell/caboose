@@ -37,7 +37,7 @@ class Bot(object):
 
     def read_config(self):
         with open('config.yaml', 'r') as f:
-            cfg = yaml.load(f)
+            cfg = yaml.safe_load(f)
             self.NICK = cfg['settings']['nick']
             self.LEADER = cfg['settings']['leader']
             self.NICKSERV_EMAIL = cfg['settings']['email']
