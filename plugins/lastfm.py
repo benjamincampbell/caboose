@@ -29,7 +29,7 @@ def api_errors(e):
 
 @command("lastfm", aliases=["nowplaying", "lfm", "np"], man="Obtains most recently played song for a given Last.fm user. "
         "-default to set default user for your nick, to use if no username given. "
-        "Usage: {leader}{command} [-default] <username>")
+        "Usage: {leader}{command} (-default) <username>")
 @db(nick="STRING UNIQUE", username="STRING")
 def lastfm(bot, line):
     from bot.colors import color
@@ -277,8 +277,6 @@ def tags(bot, line):
             logger.warning("API Error: no ['toptags'] key for {artist}".format(artist=artist))
         line.conn.privmsg(line.args[0], msg)
 
-
-# TODO: add feature to enqueue a # of creeps, no repeats. I.e. !mc 3 to creep on 3 people in a row, no repeats.
 @command("musiccreep", aliases=["creep", "mc"], man="Obtain the last-played song of a random user who has a default "
         "Last.fm username set via !lastfm. Optionally supply number to enqueue creeps. Usage: {leader}{command} <number>")
 def musiccreep(bot, line):
@@ -413,6 +411,7 @@ def plays(bot, line):
     import logging
     from bot.db import get_equal
     from bot.colors import color
+    from plugins.lastfm import get_last_played_track
     from plugins.lastfm import get_artist_plays_for_user
     
     logger = logging.getLogger("log")
