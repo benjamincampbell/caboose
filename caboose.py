@@ -24,7 +24,7 @@ if len(sys.argv) > 1:
 else:
     logger.setLevel(logging.INFO)
 
-handler = TimedRotatingFileHandler(log_name, when="midnight", interval=1)
+handler = TimedRotatingFileHandler(log_name, when="midnight", interval=1, encoding='utf8')
 handler.suffix = "%Y-%m-%d"
 logger.addHandler(handler)
 
