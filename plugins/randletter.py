@@ -4,6 +4,6 @@ from bot.command import command
 def randletter(bot, line):
     import string
     import random
-    text = random.choice(string.digits + string.ascii_uppercase)
+    text = random.choice(string.ascii_uppercase)
     
     line.conn.privmsg(line.args[0], text)
