@@ -27,7 +27,7 @@ def api_errors(e):
     }
     return errors[e]
 
-@command("lastfm", aliases=["nowplaying", "lfm", "np"], man="Obtains most recently played song for a given Last.fm user. "
+@command("lastfm", aliases=["nowplaying", "lfm", "np", "fm"], man="Obtains most recently played song for a given Last.fm user. "
         "-default to set default user for your nick, to use if no username given. "
         "Usage: {leader}{command} (-default) <username>")
 @db(nick="STRING UNIQUE", username="STRING")
@@ -307,11 +307,12 @@ def musiccreep(bot, line):
     if num > len(results):
         num = len(results)
 
-    choices = random.sample(results, num)
+    unique_results = set([r["username"] for r in results])
+
+    choices = random.sample(unique_results, num)
 
     print(choices)
-    for u in choices:
-        username = u["username"]
+    for username in choices:
         msg = get_last_played_track(username, API_KEY)
 
         line.conn.privmsg(line.args[0], msg)
