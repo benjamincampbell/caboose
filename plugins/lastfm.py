@@ -82,95 +82,6 @@ def lastfm(bot, line):
 
         line.conn.privmsg(line.args[0], msg)
 
-def get_last_played_track(username, api_key):
-    RECENT_TRACK_URL = "http://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user={user}&api_key={api_key}&format=json"
-    TRACK_INFO_URL = "http://ws.audioscrobbler.com/2.0/?method=track.getInfo&api_key={api_key}&artist={artist}&track={track}&username={user}&format=json"
-
-    recent_response = requests.get(RECENT_TRACK_URL.format(user=username, api_key=api_key))
-
-    try:
-        recent_json = json.loads(recent_response.text)
-    except ValueError:
-        logger.severe("Error parsing response: {response}".format(response=recent_response))
-        line.conn.privmsg(line.args[0], "Error parsing JSON response")
-        return None
-
-    try:
-        error = recent_json["error"]
-        user_exists = False
-    except KeyError:
-        user_exists = True
-
-    if user_exists:
-        last_fm_track_user = recent_json["recenttracks"]["@attr"]["user"]
-
-        try:
-            lastfm_track_info = recent_json["recenttracks"]["track"][0]
-            track_exists = True
-        except IndexError:
-            track_exists = False
-
-        if track_exists:
-            # pp = pprint.PrettyPrinter(indent=4)
-            # pp.pprint(lastfm_track_info)
-
-            lastfm_track_song = lastfm_track_info["name"]
-            lastfm_track_artist = lastfm_track_info["artist"]["#text"]
-            lastfm_track_album = lastfm_track_info["album"]["#text"]
-
-            try:
-                lastfm_track_time = lastfm_track_info["@attr"]["nowplaying"]
-                now_playing = True
-            except KeyError:
-                lastfm_track_time = lastfm_track_info["date"]["#text"]
-                now_playing = False
-
-            track_info_response = requests.get(TRACK_INFO_URL.format(api_key=api_key, artist=lastfm_track_artist,
-                track=lastfm_track_song, user=last_fm_track_user))
-            track_info_json = json.loads(track_info_response.text)
-
-            last_fm_track_tags = []
-
-            try:
-                lastfm_track_playcount = track_info_json["track"]["userplaycount"]
-                track_info_exists = True
-                last_fm_track_tags = track_info_json["track"]["toptags"]["tag"]
-            except KeyError:
-                track_info_exists = False
-                lastfm_track_playcount = "0"
-
-            # pp.pprint(track_info_json)
-
-            if (last_fm_track_tags == []):
-                tags = ""
-            else:
-                tags = "({0}) ".format(", ".join(t["name"] for t in last_fm_track_tags))
-
-            if now_playing:
-                msg = "{0} is listening to {1} by {2} from the album {3} {4}[playcount: {5}]".format(
-                    color(last_fm_track_user, 'green'),
-                    color(lastfm_track_song, 'lightblue'),
-                    color(lastfm_track_artist, 'lightblue'),
-                    color(lastfm_track_album, 'lightblue'),
-                    tags,
-                    color(lastfm_track_playcount, 'green'))
-            else:
-                msg = "{0}'s last track: {1} by {2} from the album {3} {4}({5}) [playcount: {6}]".format(
-                    color(last_fm_track_user, 'green'),
-                    color(lastfm_track_song, 'lightblue'),
-                    color(lastfm_track_artist, 'lightblue'),
-                    color(lastfm_track_album, 'lightblue'),
-                    tags, lastfm_track_time,
-                    color(lastfm_track_playcount, 'green'))
-
-        else:
-            # user exists, track does not
-            msg = "{0} has never listened to anything.".format(color(last_fm_track_user, 'green'))
-    else:
-        # user does not exist
-        msg = "User {0} does not exist.".format(color(username, 'green'))
-    return msg
-
 @command("similar", man="Obtain artists similar to the given artist. Usage: {leader}{command} <artist>")
 def similar(bot, line):
     import json
@@ -318,41 +229,6 @@ def musiccreep(bot, line):
         line.conn.privmsg(line.args[0], msg)
         time.sleep(2)
 
-def get_artists_for_tag(tag, api_key):
-    TAG_URL="http://ws.audioscrobbler.com/2.0/?method=tag.gettopartists&tag={tag}&api_key={api_key}&format=json&limit=269"
-
-    tag_response = requests.get(TAG_URL.format(tag=tag, api_key=api_key))
-    tag_json = json.loads(tag_response.text)
-    logger = logging.getLogger("log")
-
-    msg = ""
-    full_artist_list = []
-
-    if "topartists" in tag_json:
-        if "artist" in tag_json["topartists"]:
-            if tag_json["topartists"]["@attr"]["tag"] == "[unknown]":
-                logger.warning("API Error: Unknown tag, but not Error code 6")
-                raise Exception("Tag {0} not found.".format(color(tag, 'green')))
-            else:
-                if not tag_json["topartists"]["artist"]:
-                    raise Exception("No artists found for tag {tag}".format(
-                        tag=color(tag, 'green')
-                    ))
-                else:
-                    full_artist_list = tag_json["topartists"]["artist"]
-        else:
-            logger.warning("API Error: no ['artist'] key for {tag}".format(tag=tag))
-    else:
-        # Some sort of error in JSON
-        if "error" in tag_json:
-            logger.warning(api_errors(str(tag_json["error"])))
-            raise Exception("API Error: Artist not found")
-        logger.warning("API Error: no ['topartists'] key for {tag}".format(tag=tag))
-        raise Exception("API Error: no ['topartists'] key for {tag}".format(tag=tag))
-
-    return full_artist_list
-
-
 @command("topartists", aliases=["ta"], man="See the top artists for the given tag. Usage: {leader}{command}")
 def topartists(bot, line):
     import json
@@ -414,12 +290,13 @@ def plays(bot, line):
     import requests
     from bot.db import get_equal
     from bot.colors import color
+    from plugins.lastfm import get_artist_plays_for_user
     
     logger = logging.getLogger("log")
 
     API_KEY = bot.SECRETS["api_keys"]["lastfm"]
     user = ""
-    balls = 0
+    plays = 0
 
     try:
         result = get_equal(bot, "lastfm", nick=line.user.nick)[0]
@@ -434,25 +311,9 @@ def plays(bot, line):
         line.conn.privmsg(line.args[0], "Please supply an artist.")
         return None
     
-    # TODO: Put the API call in its own function like the other commands, couldn't get past ImportError for some reason
+    artist, plays = get_artist_plays_for_user(API_KEY, user, artist)
 
-    PLAYS_URL = "http://ws.audioscrobbler.com/2.0/?method=artist.getinfo&artist={artist}&api_key={api_key}&format=json&username={username}"
-    
-    response = requests.get(PLAYS_URL.format(artist=artist, api_key=API_KEY, username=user))
-
-    try:
-        plays_json = json.loads(response.text)
-    except ValueError:
-        logger.severe("Error parsing response: {response}".format(response=response))
-        return None
-
-    try:
-        balls = plays_json["artist"]["stats"]["userplaycount"]
-        artist = plays_json["artist"]["name"]
-    except:
-        return None
-
-    msg = "{user} has listened to {artist} {playcount} times".format(user=color(user, "green"), artist=color(artist, "lightblue"), playcount=color(balls,"green"))
+    msg = "{user} has listened to {artist} {playcount} times".format(user=color(user, "green"), artist=color(artist, "lightblue"), playcount=color(plays,"green"))
 
     line.conn.privmsg(line.args[0], msg)
 
@@ -478,9 +339,17 @@ def top(bot, line):
 
     linesplit = line.text.split()
 
+    time_periods = {
+        "-a":"all time",
+        "-w":"last week",
+        "-m":"last month",
+        "-3m":"last three months",
+        "-y":"last year"
+    }
+
     for a in linesplit:
         if a[0] == '-':
-            if a[1:] not in ["a", "w", "m", "3m", "y"]: # TODO: move time_periods up here, use keys
+            if a[1:] not in time_periods:
                 line.conn.privmsg(line.args[0], "Not a valid argument")
                 return None
             tag = a
@@ -506,34 +375,70 @@ def top(bot, line):
         # something else?
 
     try:
-        username, artist_counts = get_top_artists_for_user(API_KEY, user, tag)
+        print("API_KEY = {0}".format(API_KEY))
+        username, artist_counts = get_top_artists_for_user(API_KEY, time_periods, user, tag)
     except TypeError:
         line.conn.privmsg(line.args[0], "Username not found")
         return None
-
-    time_periods = {
-        "-a":"all time",
-        "-w":"last week",
-        "-m":"last month",
-        "-3m":"last three months",
-        "-y":"last year"
-    }
 
     msg = "{user}'s most played artists ({time_period}):".format(user=color(username, "green"), time_period=time_periods[tag])
     msg += ",".join(map(lambda x: color(" "+x[0], 'lightblue')+" ({})".format(x[1]), artist_counts))
 
     line.conn.privmsg(line.args[0], msg)
 
-def get_top_artists_for_user(API_KEY, user, time_arg="-a"):
+@command("kotp", aliases=["topplays", "tp", "toplisteners", "tl"], man="King of the Plays, get the IRC users who listen to the given artist the most. Usage: {leader}{command} <artist>")
+def kotp(bot, line):
+    import logging
+    import json
+    import requests
+    from bot.db import get_equal
+    from bot.colors import color
+    from plugins.lastfm import get_artist_plays_for_user
+
+    API_KEY = bot.SECRETS["api_keys"]["lastfm"]
+    artist = line.text
+
+    users_rows = get_equal(bot, "lastfm")
+    users_plays = {}
+
+    for user_row in users_rows:
+        username = user_row["username"]
+        artist, plays = get_artist_plays_for_user(API_KEY, username, artist)
+        if int(plays) > 0:
+            users_plays[username] = int(plays)
+
+    print(users_plays)
+
+    sorted_users_plays = sorted(users_plays.items(), key=lambda x: x[1], reverse=True)
+
+    msg = "Top listeners for {artist}:".format(artist=color(artist, "lightblue"))
+    msg += ",".join(map(lambda x: color(" "+x[0], "green")+" ({})".format(x[1]), sorted_users_plays))
+
+    line.conn.privmsg(line.args[0], msg)
+
+def get_artist_plays_for_user(API_KEY, user, artist):
     logger = logging.getLogger("log")
 
-    time_periods = {
-        "-a":"overall",
-        "-w":"7day",
-        "-m":"1month",
-        "-3m":"3month",
-        "-y":"12month"
-    }
+    PLAYS_URL = "http://ws.audioscrobbler.com/2.0/?method=artist.getinfo&artist={artist}&api_key={api_key}&format=json&username={username}"
+    
+    response = requests.get(PLAYS_URL.format(artist=artist, api_key=API_KEY, username=user))
+
+    try:
+        plays_json = json.loads(response.text)
+    except ValueError:
+        logger.severe("Error parsing response: {response}".format(response=response))
+        return None
+
+    try:
+        plays = plays_json["artist"]["stats"]["userplaycount"]
+        artist = plays_json["artist"]["name"]
+    except:
+        return None
+    
+    return (artist, plays)
+
+def get_top_artists_for_user(API_KEY, time_periods, user, time_arg="-a"):
+    logger = logging.getLogger("log")
 
     artist_counts = []
 
@@ -552,3 +457,126 @@ def get_top_artists_for_user(API_KEY, user, time_arg="-a"):
         return (username, artist_counts)
     except KeyError:
         logger.warning("API Error. JSON: {json}".format(json=top_json))
+
+def get_artists_for_tag(tag, api_key):
+    TAG_URL="http://ws.audioscrobbler.com/2.0/?method=tag.gettopartists&tag={tag}&api_key={api_key}&format=json&limit=269"
+
+    tag_response = requests.get(TAG_URL.format(tag=tag, api_key=api_key))
+    tag_json = json.loads(tag_response.text)
+    logger = logging.getLogger("log")
+
+    msg = ""
+    full_artist_list = []
+
+    if "topartists" in tag_json:
+        if "artist" in tag_json["topartists"]:
+            if tag_json["topartists"]["@attr"]["tag"] == "[unknown]":
+                logger.warning("API Error: Unknown tag, but not Error code 6")
+                raise Exception("Tag {0} not found.".format(color(tag, 'green')))
+            else:
+                if not tag_json["topartists"]["artist"]:
+                    raise Exception("No artists found for tag {tag}".format(
+                        tag=color(tag, 'green')
+                    ))
+                else:
+                    full_artist_list = tag_json["topartists"]["artist"]
+        else:
+            logger.warning("API Error: no ['artist'] key for {tag}".format(tag=tag))
+    else:
+        # Some sort of error in JSON
+        if "error" in tag_json:
+            logger.warning(api_errors(str(tag_json["error"])))
+            raise Exception("API Error: Artist not found")
+        logger.warning("API Error: no ['topartists'] key for {tag}".format(tag=tag))
+        raise Exception("API Error: no ['topartists'] key for {tag}".format(tag=tag))
+
+    return full_artist_list
+
+def get_last_played_track(username, api_key):
+    RECENT_TRACK_URL = "http://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user={user}&api_key={api_key}&format=json"
+    TRACK_INFO_URL = "http://ws.audioscrobbler.com/2.0/?method=track.getInfo&api_key={api_key}&artist={artist}&track={track}&username={user}&format=json"
+
+    recent_response = requests.get(RECENT_TRACK_URL.format(user=username, api_key=api_key))
+
+    try:
+        recent_json = json.loads(recent_response.text)
+    except ValueError:
+        logger.severe("Error parsing response: {response}".format(response=recent_response))
+        line.conn.privmsg(line.args[0], "Error parsing JSON response")
+        return None
+
+    try:
+        error = recent_json["error"]
+        user_exists = False
+    except KeyError:
+        user_exists = True
+
+    if user_exists:
+        last_fm_track_user = recent_json["recenttracks"]["@attr"]["user"]
+
+        try:
+            lastfm_track_info = recent_json["recenttracks"]["track"][0]
+            track_exists = True
+        except IndexError:
+            track_exists = False
+
+        if track_exists:
+            # pp = pprint.PrettyPrinter(indent=4)
+            # pp.pprint(lastfm_track_info)
+
+            lastfm_track_song = lastfm_track_info["name"]
+            lastfm_track_artist = lastfm_track_info["artist"]["#text"]
+            lastfm_track_album = lastfm_track_info["album"]["#text"]
+
+            try:
+                lastfm_track_time = lastfm_track_info["@attr"]["nowplaying"]
+                now_playing = True
+            except KeyError:
+                lastfm_track_time = lastfm_track_info["date"]["#text"]
+                now_playing = False
+
+            track_info_response = requests.get(TRACK_INFO_URL.format(api_key=api_key, artist=lastfm_track_artist,
+                track=lastfm_track_song, user=last_fm_track_user))
+            track_info_json = json.loads(track_info_response.text)
+
+            last_fm_track_tags = []
+
+            try:
+                lastfm_track_playcount = track_info_json["track"]["userplaycount"]
+                track_info_exists = True
+                last_fm_track_tags = track_info_json["track"]["toptags"]["tag"]
+            except KeyError:
+                track_info_exists = False
+                lastfm_track_playcount = "0"
+
+            # pp.pprint(track_info_json)
+
+            if (last_fm_track_tags == []):
+                tags = ""
+            else:
+                tags = "({0}) ".format(", ".join(t["name"] for t in last_fm_track_tags))
+
+            if now_playing:
+                msg = "{0} is listening to {1} by {2} from the album {3} {4}[playcount: {5}]".format(
+                    color(last_fm_track_user, 'green'),
+                    color(lastfm_track_song, 'lightblue'),
+                    color(lastfm_track_artist, 'lightblue'),
+                    color(lastfm_track_album, 'lightblue'),
+                    tags,
+                    color(lastfm_track_playcount, 'green'))
+            else:
+                msg = "{0}'s last track: {1} by {2} from the album {3} {4}({5}) [playcount: {6}]".format(
+                    color(last_fm_track_user, 'green'),
+                    color(lastfm_track_song, 'lightblue'),
+                    color(lastfm_track_artist, 'lightblue'),
+                    color(lastfm_track_album, 'lightblue'),
+                    tags, lastfm_track_time,
+                    color(lastfm_track_playcount, 'green'))
+
+        else:
+            # user exists, track does not
+            msg = "{0} has never listened to anything.".format(color(last_fm_track_user, 'green'))
+    else:
+        # user does not exist
+        msg = "User {0} does not exist.".format(color(username, 'green'))
+    return msg
