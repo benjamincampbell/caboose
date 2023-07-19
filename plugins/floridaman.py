@@ -1,6 +1,6 @@
 from bot.command import command
 
-@command("floridaman", aliases = ["fm", "florida"], man = "Returns a random Florida Man article from a google search. Usage: {leader}{command}")
+@command("floridaman", aliases = ["florida"], man = "Returns a random Florida Man article from a google search. Usage: {leader}{command}")
 def floridaman(bot, line):
     import random
     import logging
