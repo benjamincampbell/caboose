@@ -12,6 +12,7 @@ class Line:
             :Twitch!twitch@hostname.com PRIVMSG #channel :!echo hello
     """
 
+
     def __init__(self, conn, raw):
         self.conn = conn
         self.type = None
@@ -20,11 +21,26 @@ class Line:
         self.text = ''
         self.raw = raw
         self.user = UserInfo()
+        self.link_match = None
+        # link_match should be such that:
+        #     link_match.group(0) is the entire match
+        #     link_match.group(1) is text prior to the link
+        #     link_match.group(2) is the protocol
+        #     link_match.group(3) is the host
+        #     link_match.group(4) is the specific page in the host
+        #     link_match.group(5) is text after the link
 
     def __str__(self):
         return self.raw
+    
+    def reply(self, text):
+        # shorthand function to respond in the channel that the line originated from
+        self.conn.privmsg(self.args[0], text)
 
     def parse_line(self, leader):
+
+        LINK_REGEX = "(.*)(http|https):\/\/([\w_-]+(?:(?:\.[\w_-]+)+))([\w.,@?^=%&:\/~+#-]*[\w@?^=%&\/~+#-])(.*)"
+
         logger = logging.getLogger("log")
         logger.info(self.raw)
         parts = collections.deque(self.raw.strip().split(' '))
@@ -47,6 +63,7 @@ class Line:
                             if p[1] in leader:
                                 self.command = p.strip()[2:]
                             else:
+
                                 txt.append(p.strip()[1:])
                         except IndexError:
                             pass
@@ -57,6 +74,11 @@ class Line:
             else:
                 txt.append(p.strip())
         self.text = ' '.join(txt)
+        
+        # check for links
+        match = re.search(LINK_REGEX, self.text)
+        if match:
+            self.link_match = match
 
 
 class UserInfo:
