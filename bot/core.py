@@ -15,7 +15,6 @@ from .line import Line
 from .response import reload_responses
 
 from googleapiclient.discovery import build
-from PyDictionary import PyDictionary
 
 class Bot(object):
     def __init__(self):
@@ -33,7 +32,6 @@ class Bot(object):
         create_tables(self, self.tables)
 
         self.setup_google()
-        self.setup_pydictionary()
 
         bot.command.decorate_mans(self.LEADER, self.COMMANDS)
 
@@ -63,9 +61,6 @@ class Bot(object):
             developerKey=self.SECRETS["api_keys"]["google"])
         #self.google_urlshortener_service = build("urlshortener", "v1",
             #developerKey=self.SECRETS["api_keys"]["google"])
-
-    def setup_pydictionary(self):
-        self.dictionary = PyDictionary()
 
     def run(self):
         line_queue = queue.Queue()
