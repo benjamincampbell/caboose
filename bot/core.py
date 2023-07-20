@@ -12,6 +12,7 @@ from .db import get_db, create_tables
 from .command import reload_commands
 from .connection import Connection
 from .line import Line
+from .response import reload_responses
 
 from googleapiclient.discovery import build
 
@@ -23,6 +24,7 @@ class Bot(object):
         self.NICKSERV_PASS = ''
         self.DB_CONN = get_db()
         self.COMMANDS, self.tables = reload_commands()
+        self.RESPONSES = reload_responses()
         self.SECRETS = []
         self.CONNECTIONS = {}
         self.CFG = self.read_config()
@@ -87,7 +89,14 @@ class Bot(object):
                                     line.args[0] = line.user.nick
 
                                 self.COMMANDS[line.command](self, line)
+                    elif line.link_match:
+                        print("link found. text before: {tb}, protocol: {p}, host: {h}, page: {pa}, text after: {ta}".format(tb=line.link_match.group(1), p=line.link_match.group(2), h=line.link_match.group(3), pa=line.link_match.group(4), ta=line.link_match.group(5)))
 
+                        hostname = line.link_match.group(3)
+                        if (hostname in self.RESPONSES):
+                            if (self.RESPONSES[hostname].enabled):
+                                self.RESPONSES[hostname](self, line)
+                        
                 line_queue.task_done()
             except Exception as err:
                 logger = logging.getLogger("log")

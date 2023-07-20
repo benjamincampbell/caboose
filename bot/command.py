@@ -35,9 +35,9 @@ class cmd(object):
 
 def command(name, **options):
     """ Command format example:
-    @command("echo", man = "Repeats back what is said. Syntax: " + bot.LEADER + "echo message")
-    def echo(nick, channel, message, bot):
-        bot.privmsg(channel, message)
+    @command("echo", man = "Repeats back what is said. Usage: {leader}{command} <message>")
+    def echo(bot, line):
+        line.conn.privmsg(line.args[0], line.text)
     """
     def decorator(function):
         global commands
