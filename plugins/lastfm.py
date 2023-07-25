@@ -349,7 +349,7 @@ def top(bot, line):
 
     for a in linesplit:
         if a[0] == '-':
-            if a[1:] not in time_periods:
+            if a[0:] not in time_periods:
                 line.conn.privmsg(line.args[0], "Not a valid argument")
                 return None
             tag = a
