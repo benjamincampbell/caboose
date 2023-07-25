@@ -317,7 +317,7 @@ def plays(bot, line):
 
     line.conn.privmsg(line.args[0], msg)
 
-@command("top", man="Get the top artists for a user in the given time frame. Usage: {leader}{command} [-w|-m|-3m|-y|-a] (<username>)")
+@command("top", man="Get the top artists for a user in the given time frame. Usage: {leader}{command} [-w|-m|-3m|-6m|-y|-a] (<username>)")
 def top(bot, line):
     import json
     import requests
@@ -344,6 +344,7 @@ def top(bot, line):
         "-w":"last week",
         "-m":"last month",
         "-3m":"last three months",
+        "-6m": "last six months",
         "-y":"last year"
     }
 
@@ -376,7 +377,7 @@ def top(bot, line):
 
     try:
         print("API_KEY = {0}".format(API_KEY))
-        username, artist_counts = get_top_artists_for_user(API_KEY, time_periods, user, tag)
+        username, artist_counts = get_top_artists_for_user(API_KEY, user, tag)
     except TypeError:
         line.conn.privmsg(line.args[0], "Username not found")
         return None
@@ -437,7 +438,15 @@ def get_artist_plays_for_user(API_KEY, user, artist):
     
     return (artist, plays)
 
-def get_top_artists_for_user(API_KEY, time_periods, user, time_arg="-a"):
+def get_top_artists_for_user(API_KEY, user, time_arg="-a"):
+    time_periods = {
+        "-a":"overall",
+        "-w":"7day",
+        "-m":"1month",
+        "-3m":"3month",
+        "-6m": "6month",
+        "-y":"12month"
+    }
     logger = logging.getLogger("log")
 
     artist_counts = []
