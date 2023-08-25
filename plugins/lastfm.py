@@ -315,7 +315,48 @@ def plays(bot, line):
 
     msg = "{user} has listened to {artist} {playcount} times".format(user=color(user, "green"), artist=color(artist, "lightblue"), playcount=color(plays,"green"))
 
-    line.conn.privmsg(line.args[0], msg)
+    line.reply(msg)
+
+@command("albumplays", aliases=["ap"], man="Get the number of plays of a specific album by an artist for the user. Usage: {leader}{command} <artist> - <album>")
+def plays(bot, line):
+    import logging
+    import json
+    import requests
+    from bot.db import get_equal
+    from bot.colors import color
+    from plugins.lastfm import get_album_plays_for_user
+    
+    logger = logging.getLogger("log")
+
+    API_KEY = bot.SECRETS["api_keys"]["lastfm"]
+    user = ""
+    plays = 0
+
+    try:
+        result = get_equal(bot, "lastfm", nick=line.user.nick)[0]
+        user = result["username"]
+    except IndexError:
+        line.conn.privmsg(line.args[0], "Please set a default username first.")
+        return None
+    
+    line_split = line.text.split("-")
+    artist = line_split[0]
+    album = line_split[1]
+
+    if artist == "":
+        line.conn.privmsg(line.args[0], "Please supply an artist.")
+        return None
+    
+    if album == "":
+        line.conn.privmsg(line.args[0], "Please supply an album.")
+        return None
+
+    artist, album, plays = get_album_plays_for_user(API_KEY, user, artist, album)
+
+    msg = "{user} has listened to {album} by {artist} {playcount} times".format(user=color(user, "green"), album=color(album, "lightcyan"), artist=color(artist, "lightblue"), playcount=color(plays,"green"))
+
+    line.reply(msg)
+
 
 @command("top", man="Get the top artists for a user in the given time frame. Usage: {leader}{command} [-w|-m|-3m|-6m|-y|-a] (<username>)")
 def top(bot, line):
@@ -437,6 +478,30 @@ def get_artist_plays_for_user(API_KEY, user, artist):
         return None
     
     return (artist, plays)
+
+def get_album_plays_for_user(API_KEY, user, artist, album):
+    logger = logging.getLogger("log")
+
+    PLAYS_URL = "http://ws.audioscrobbler.com/2.0/?method=album.getinfo&api_key={api_key}&artist={artist}&album={album}&username={username}&format=json"
+
+    response = requests.get(PLAYS_URL.format(api_key=API_KEY, artist=artist, album=album, username=user))
+
+    try:
+        plays_json = json.loads(response.text)
+    except ValueError:
+        logger.severe("Error parsing response: {response}".format(response=response))
+        return None
+
+    try:
+        album = plays_json["album"]["name"]
+        plays = plays_json["album"]["userplaycount"]
+        artist = plays_json["album"]["artist"]
+    except:
+        return None
+    
+    return (artist, album, plays)
+    
+
 
 def get_top_artists_for_user(API_KEY, user, time_arg="-a"):
     time_periods = {
