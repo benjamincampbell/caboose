@@ -458,6 +458,38 @@ def kotp(bot, line):
 
     line.conn.privmsg(line.args[0], msg)
 
+@command("kotpalbum", aliases=["topalbumplays", "tap", "topalbumlisteners", "tal"], man="King of the Plays (Album), get the IRC users who listen to the given album the most. Usage: {leader}{command} <artist> - album")
+def kotpalbum(bot, line):
+    import logging
+    import json
+    import requests
+    from bot.db import get_equal
+    from bot.colors import color
+    from plugins.lastfm import get_album_plays_for_user
+
+    API_KEY = bot.SECRETS["api_keys"]["lastfm"]
+    line_split = line.text.split("-")
+    artist = line_split[0]
+    album = line_split[1]
+
+    users_rows = get_equal(bot, "lastfm")
+    users_plays = {}
+
+    for user_row in users_rows:
+        username = user_row["username"]
+        artist, album, plays = get_album_plays_for_user(API_KEY, username, artist, album)
+        if int(plays) > 0:
+            users_plays[username] = int(plays)
+
+    print(users_plays)
+
+    sorted_users_plays = sorted(users_plays.items(), key=lambda x: x[1], reverse=True)
+
+    msg = "Top listeners for {album} by {artist}:".format(album=color(album, "lightcyan"), artist=color(artist, "lightblue"))
+    msg += ",".join(map(lambda x: color(" "+x[0], "green")+" ({})".format(x[1]), sorted_users_plays))
+
+    line.reply(msg)
+
 def get_artist_plays_for_user(API_KEY, user, artist):
     logger = logging.getLogger("log")
 
