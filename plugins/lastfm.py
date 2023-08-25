@@ -318,7 +318,7 @@ def plays(bot, line):
     line.reply(msg)
 
 @command("albumplays", aliases=["ap"], man="Get the number of plays of a specific album by an artist for the user. Usage: {leader}{command} <artist> - <album>")
-def plays(bot, line):
+def albumplays(bot, line):
     import logging
     import json
     import requests
