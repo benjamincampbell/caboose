@@ -1,6 +1,6 @@
 from bot.command import command
 
-@command("randletter", man = "Chooses a random letter. Optionally supply number to return multiple letters. Usage: {leader}{command} <number>")
+@command("randletter", man = "Chooses a random letter. Optionally supply number to return multiple letters.  Usage: {leader}{command} <number> ")
 def randletter(bot, line):
     import string
     import random
@@ -16,8 +16,6 @@ def randletter(bot, line):
         else:
             line.conn.privmsg(line.user.nick, "Please enter a number 5 or fewer.")
 
-    # else no args
-
     text = random.sample(string.ascii_uppercase, num)
 
-line.conn.privmsg(line.args[0], text)
+    line.conn.privmsg(line.args[0], text)
