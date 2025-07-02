@@ -218,9 +218,31 @@ def musiccreep(bot, line):
     if num > len(results):
         num = len(results)
 
-    unique_results = set([r["username"] for r in results])
+    # Get the caller's Last.fm username to exclude them
+    caller_username = None
+    try:
+        caller_result = get_equal(bot, "lastfm", nick=line.user.nick)[0]
+        caller_username = caller_result["username"]
+    except IndexError:
+        # Caller doesn't have a default username set, so no need to exclude them
+        pass
 
-    choices = random.sample(unique_results, num)
+    # Create list of usernames, excluding the caller
+    available_usernames = []
+    for r in results:
+        username = r["username"]
+        if caller_username is None or username != caller_username:
+            available_usernames.append(username)
+
+    # Check if we have enough users after excluding the caller
+    if len(available_usernames) == 0:
+        line.conn.privmsg(line.args[0], "No other users with Last.fm accounts found to creep on.")
+        return None
+
+    if num > len(available_usernames):
+        num = len(available_usernames)
+
+    choices = random.sample(available_usernames, num)
 
     print(choices)
     for username in choices:
@@ -599,6 +621,9 @@ def get_artists_for_tag(tag, api_key):
     return full_artist_list
 
 def get_last_played_track(username, api_key):
+
+    logger = logging.getLogger("log")
+
     RECENT_TRACK_URL = "http://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user={user}&api_key={api_key}&format=json"
     TRACK_INFO_URL = "http://ws.audioscrobbler.com/2.0/?method=track.getInfo&api_key={api_key}&artist={artist}&track={track}&username={user}&format=json"
 
@@ -683,6 +708,9 @@ def get_last_played_track(username, api_key):
             # user exists, track does not
             msg = "{0} has never listened to anything.".format(color(last_fm_track_user, 'green'))
     else:
-        # user does not exist
-        msg = "User {0} does not exist.".format(color(username, 'green'))
+        try:
+            msg = api_errors(str(error))
+        except Exception:
+            msg = "An unknown error occurred."
+        logger.warning(msg)
     return msg
