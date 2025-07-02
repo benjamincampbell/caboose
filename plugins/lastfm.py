@@ -227,12 +227,13 @@ def musiccreep(bot, line):
         # Caller doesn't have a default username set, so no need to exclude them
         pass
 
-    # Create list of usernames, excluding the caller
+    # Create list of usernames, excluding the caller and removing duplicates
     available_usernames = []
     for r in results:
         username = r["username"]
         if caller_username is None or username != caller_username:
-            available_usernames.append(username)
+            if username not in available_usernames:
+                available_usernames.append(username)
 
     # Check if we have enough users after excluding the caller
     if len(available_usernames) == 0:
